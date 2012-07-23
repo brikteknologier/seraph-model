@@ -52,12 +52,12 @@ Saves or updates an object in the database. This is a composition of the
 information and an example (they are operationally identical).
 
 <a name="findAll"/>
-## model.findAll(function(err, allOfTheseModels))
+## model.findAll(callback(err, allOfTheseModels))
 
 Finds all of the objects that were saved with this type.
 
 <a name="where"/>
-## model.where
+## model.where(callback(err, matchingModels))
 
 This is a operationally similar to 
 [seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
