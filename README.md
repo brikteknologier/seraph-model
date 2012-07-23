@@ -2,6 +2,7 @@ __seraph_model__ provides some convenient functions for storing and retrieving
 typed nodes from a neo4j database. It is a thin model layer to sit on top of 
 [seraph](https://github.com/brikteknologier/seraph). 
 
+<a name="quick"/>
 ### Quick example
 
 ```javascript
@@ -30,6 +31,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [model.findAll](#findAll)
 * [model.where](#where)
 
+<a name="create"/>
 ## Creating a new model {#create}
 
 __seraph_model(seraphDbObject, modelTypeName)
@@ -41,6 +43,7 @@ It works by indexing each object under a `nodes` index. Each different model is
 simply an item in that index, with all of the instances of that model attached
 to it.
 
+<a name="save"/>
 ## model.save(object(s), callback(err, savedObject)) {#save}
 
 Saves or updates an object in the database. This is a composition of the
@@ -48,8 +51,15 @@ Saves or updates an object in the database. This is a composition of the
 [seraph.save](https://github.com/brikteknologier/seraph#node.save) for more 
 information and an example (they are operationally identical).
 
-## model.findAll(function(err, allOfTheseModels)) {#findAll}
+<a name="findAll"/>
+## model.findAll(function(err, allOfTheseModels))
 
-Finds all of the objects that were saved with this type.]
+Finds all of the objects that were saved with this type.
 
+<a name="where"/>
 ## model.where
+
+This is a operationally similar to 
+[seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
+restricted to searching for other objects indexed as this kind of model. See the
+[quick example](#quick) for an example of this in action. 
