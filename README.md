@@ -1,5 +1,5 @@
 __seraph_model__ provides some convenient functions for storing and retrieving
-typed nodes from a neo4j database. It is a thin model layer to sit on top of 
+typed nodes from a neo4j database. It is intended to work with 
 [seraph](https://github.com/brikteknologier/seraph). 
 
 <a name="quick"/>
