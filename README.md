@@ -43,9 +43,9 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [model.cypherStart](#cypherStart)
 
 <a name="create"/>
-## Creating a new model {#create}
+## Creating a new model
 
-__seraph_model(seraphDbObject, modelTypeName)
+__seraph_model(seraphDbObject, modelTypeName)__
 
 You can create a new model by calling the function returned by requiring
 `seraph_model`. There are no instances of this model, only objects, which are 
