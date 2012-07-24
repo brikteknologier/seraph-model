@@ -56,6 +56,16 @@ It works by indexing each object under a `nodes` index. Each different model is
 simply an item in that index, with all of the instances of that model attached
 to it.
 
+### Example
+```javascript
+var db = require('seraph')('http://localhost:7474');
+var Beer = require('seraph_model')(db, 'beer');
+
+Beer.save({name: 'Pacific Ale', brewery: 'Stone & Wood'}, function(err, beer) {
+  // saved!
+});
+```
+
 <a name="preparation"/>
 ## Adding preparers
 
