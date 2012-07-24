@@ -156,7 +156,7 @@ Saves or updates an object in the database. The steps for doing this are:
 3. `object` is saved using [seraph.save](https://github.com/brikteknologier/seraph#node.save)
 4. `object` is indexed as this type of model using [seraph.index](https://github.com/brikteknologier/seraph#node.index)
 
-There is also the internal `model._saveWithoutPrep` method which only performs
+There is also the internal `model._unsafeSave` method which only performs
 steps 3 & 4. However, use of that method is discouraged and unsupported.
 
 The object returned is given an ID. See
