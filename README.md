@@ -40,6 +40,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [model.prepare](#prepare)
 * [model.validate](#validate)
 * [model.fields](#fields)
+* [model.cypherStart](#cypherStart)
 
 <a name="create"/>
 ## Creating a new model {#create}
@@ -197,3 +198,23 @@ in objects to be saved. If it is set, any properties in objects to be saved that
 are not included in this array are stripped. See 
 [Setting a properties whitelist](#settingfields) for more information and
 examples.
+
+<a name="cypherStart"/>
+## model.cypherStart()
+
+Returns the appropriate START point for a cypher query for this kind of model.
+Example:
+
+```javascript
+var beer = model(db, 'Beer');
+
+beer.cypherStart(); // -> 'node:nodes(type = "Beer")'
+```
+
+You can then use this in a seraph `find` or `query` call. Example:
+
+```javascript
+db.find({type: 'IPA'}, false, beer.cypherStart(), function(err, beers) {
+  // beers -> all beers with type == 'IPA'
+});
+```
