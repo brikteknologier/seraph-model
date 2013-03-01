@@ -31,6 +31,8 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [Creating a new Model](#create)
 * [Adding preparers](#preparation)
 * [Adding validators](#validation)
+* [Adding indexers](#indexers)
+* [beforeSave/afterSave events](#saveevents)
 * [Setting a properties whitelist](#settingfields)
 
 ## Model instance methods
@@ -92,14 +94,14 @@ var prepareFileSize = function(object, callback) {
   });
 }
 
-model.preparers.push(prepareFileSize);
+model.on('prepare', prepareFileSize);
 
 model.save({file: 'foo.txt'}, function(err, object) {
   // object -> { file: 'foo.txt', filesize: 521, id: 0 }
 });
 
 mode.save({file: 'nonexistant.txt'}, function(err, object) {
-  // err -> 'There was an error filding the file size'
+  // err -> 'There was an error finding the file size'
 });
 ```
 
@@ -123,7 +125,7 @@ var validateAge = function(person, callback) {
   }
 }
 
-model.validators.push(validateAge);
+model.on('validate', validateAge);
 
 model.save({ name: 'Jon', age: 23 }, function(err, person) {
   // person -> { name: 'Jon', age: 23, id: 0 }
@@ -132,6 +134,44 @@ model.save({ name: 'Jon', age: 23 }, function(err, person) {
 model.save({ name: 'Jordan', age: 17 }, function(err, person) {
   // err -> 'You must be 21 or older to sign up!'
 });
+```
+
+<a name="indexers"/>
+## Adding indexers
+__Indexers__ are functions that are called with an object immediately after it
+has been saved for the first time.
+
+They are passed the object and a callback: you are expected to do all of the
+indexing yourself. The callback takes one argument, an `err`. This is a
+dangerous place to return an error however, as the afterSave event has not yet
+been fired, but the object _has_ been saved. Regardless, returning an error here
+will trigger the callback of the entire save event immediately, with the error
+you pass. The afterSave event will not be fired.
+
+### Example 
+
+```javascript
+model.on('index', function(obj, cb) {
+  db.index('wobblebangs', obj, 'uuid', createUuid(), cb);
+});
+```
+
+<a name="saveevents"/>
+## Save events
+
+There's a few events you can listen on:
+
+* `beforeSave` fired after preparation and validation, but before saving.
+* `afterSave` fired after saving and indexing. 
+
+These listeners do not take a callback.
+
+### Example
+
+```javascript
+model.on('beforeSave', function(obj) {
+  console.log(obj, "is about to be saved");
+})
 ```
 
 <a name="settingfields"/>
