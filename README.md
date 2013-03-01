@@ -148,6 +148,8 @@ been fired, but the object _has_ been saved. Regardless, returning an error here
 will trigger the callback of the entire save event immediately, with the error
 you pass. The afterSave event will not be fired.
 
+You can manually index an object by calling `model.index(obj, callback)`.
+
 ### Example 
 
 ```javascript
