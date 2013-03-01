@@ -7,6 +7,8 @@ function SeraphMock() {
   Emitter.call(this);
   var self = this;
 
+  self.options = {id: 'id'};
+
   function mockMethod(methodName) {
     self[methodName] = function() {
       self.emit(methodName, [].slice.call(arguments));
@@ -74,7 +76,7 @@ describe('Seraph Model', function() {
   });
   describe('whitelisting/fields', function() {
     it('should whitelist a series of properties', function(done) {
-      var beer = model(null, 'Beer');
+      var beer = model(new SeraphMock(), 'Beer');
       beer.fields = [ 'type', 'brewery', 'name' ];
 
       var ipa = {type:'IPA', brewery:'Lervig', name:'Rye IPA', country:'Norway'};
