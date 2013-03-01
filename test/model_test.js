@@ -11,7 +11,9 @@ function SeraphMock() {
 
   function mockMethod(methodName) {
     self[methodName] = function() {
-      self.emit(methodName, [].slice.call(arguments));
+      var args = [].slice.call(arguments);
+      self.emit(methodName, args);
+      args.pop()(null, args.unshift());
     };
   }
 
@@ -38,6 +40,146 @@ describe('Seraph Model', function() {
         assert.ok(err);
         done();
       })
+    });
+  });
+  describe('indexing', function() {
+    it ('should index a new object', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+      
+      var ipa = {type: 'IPA', age: 25};
+      
+      var hasBeenIndexed = false;
+      mockdb.on('index', function(args) {
+        hasBeenIndexed = true;
+      });
+      beer.save(ipa, function(err, ipa) {
+        assert(!err);
+        assert(hasBeenIndexed);
+        done();
+      });
+    });
+    it ('should not index an old object', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+      
+      var ipa = {type: 'IPA', age: 25, id: 54};
+      
+      var hasBeenIndexed = false;
+      mockdb.on('index', function(args) {
+        hasBeenIndexed = true;
+      });
+      beer.save(ipa, function(err, ipa) {
+        assert(!err);
+        assert(!hasBeenIndexed);
+        done();
+      });
+    });
+    it ('should manually index an object', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+      
+      var ipa = {type: 'IPA', age: 25, id: 54};
+      
+      var hasBeenIndexed = false;
+      mockdb.on('index', function(args) {
+        hasBeenIndexed = true;
+      });
+      beer.index(ipa, function(err, ipa) {
+        assert(!err);
+        assert(hasBeenIndexed);
+        done();
+      });
+    });
+    it ('should add to more than one index', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+      
+      beer.on('index', function(obj, cb) {
+        mockdb.index(obj, cb);
+      });
+      
+      var ipa = {type: 'IPA', age: 25, id: 54};
+      
+      var indexCount = 0;
+      mockdb.on('index', function(args) {
+        indexCount++;
+      });
+      beer.index(ipa, function(err, ipa) {
+        assert(!err);
+        assert(indexCount == 2);
+        done();
+      });
+    });
+  });
+  describe('save events', function() {
+    it('should fire the beforeSave event', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+
+      var evfired = false;
+      beer.on('beforeSave', function() {
+        evfired = true;
+      });
+
+      beer.save({type:'IPA'}, function(err,obj) {
+        assert(evfired);
+        assert(!err);
+        done();
+      });
+    });
+    it('should fire the afterSave event', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+
+      var evfired = false;
+      beer.on('afterSave', function() {
+        evfired = true;
+      });
+
+      beer.save({type:'IPA'}, function(err,obj) {
+        assert(evfired);
+        assert(!err);
+        done();
+      });
+    });
+    it('should fire the beforeSave event after prep & val', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+
+      var evfired = false;
+      var validated = false;
+      var prepared = false;
+      beer.on('beforeSave', function() {
+        evfired = validated && prepared;
+      });
+
+      beer.on('validate', function(obj,cb) { validated = true, cb(); });
+      beer.on('prepare', function(obj,cb) { prepared = true, cb(null, obj) });
+
+      beer.save({type:'IPA'}, function(err,obj) {
+        assert(evfired);
+        assert(!err);
+        done();
+      });
+    });
+    it('should fire the afterSever event after indexing', function(done) {
+      var mockdb = new SeraphMock();
+      var beer = model(mockdb, 'Beer');
+
+      var evfired = false;
+      var indexed = false;
+      beer.on('afterSave', function() {
+        evfired = indexed;
+      });
+
+      beer.on('index', function(obj,cb) { indexed = true, cb(); });
+
+      beer.save({type:'IPA'}, function(err,obj) {
+        assert(evfired);
+        assert(!err);
+        done();
+      });
     });
   });
   describe('preparation', function() {
