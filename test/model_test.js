@@ -24,7 +24,7 @@ describe('Seraph Model', function() {
     it('should fail save call when validation fails', function(done) {
       var mockdb = new SeraphMock();
       var beer = model(mockdb, 'Beer');
-      beer.validators.push(function(beer, callback) {
+      beer.on('validate', function(beer, callback) {
         callback(beer.age > 15 ? 'fail!' : null);
       });
 
@@ -44,7 +44,7 @@ describe('Seraph Model', function() {
     it('should transform the object by calling preparers', function(done) {
       var numberThinger = model(null, 'NumberThinger');
       var numberThing = { number: 10 };
-      numberThinger.preparers.push(function(numberThing, callback) {
+      numberThinger.on('prepare', function(numberThing, callback) {
         numberThing.number *= 15;
         callback(null, numberThing);
       });
@@ -58,7 +58,7 @@ describe('Seraph Model', function() {
     it('should fail save call when a preparer fails', function(done) {
       var mockdb = new SeraphMock();
       var beer = model(mockdb, 'Beer');
-      beer.preparers.push(function(beer, callback) {
+      beer.on('prepare', function(beer, callback) {
         callback('fail!');
       });
 
