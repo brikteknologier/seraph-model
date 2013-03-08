@@ -239,8 +239,8 @@ describe('Seraph Model', function() {
       });
     });
   });
-  describe('it should read a model from the db', fuction(done) {
-    var beer = model(db, 'Beer');
+  describe('it should read a model from the db', function(done) {
+    var beer = model(new SeraphMock(), 'Beer');
     beer.save({name:"120m IPA"}, function(err, dfh) {
       assert(!err);
       beer.read(dfh.id, function(err, thebeer) {
@@ -251,7 +251,7 @@ describe('Seraph Model', function() {
     });
   });
   describe('reading should only read the relevant model', function(done) {
-    var db = new SeraphMock()l
+    var db = new SeraphMock();
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
   
@@ -263,6 +263,38 @@ describe('Seraph Model', function() {
           assert(err);
           food.read(beer.id, function(err, nothing) {
             assert(err);
+            done();
+          });
+        });
+      })
+    });
+    
+  });
+  describe('it should check if a model exists', function(done) {
+    var beer = model(new SeraphMock(), 'Beer');
+    beer.save({name:"120m IPA"}, function(err, dfh) {
+      assert(!err);
+      beer.exists(dfh.id, function(err, exists) {
+        assert(!err);
+        assert(exists);
+        done();
+      });
+    });
+  });
+  describe('exists should only return true for the relevant model', 
+  function(done) {
+    var db = new SeraphMock();
+    var beer = model(db, 'Beer');
+    var food = model(db, 'Food');
+  
+    beer.save({name:"Heady Topper"}, function(err, heady) {
+      assert(!err);
+      food.save({name:"Pinnekjøtt"}, function(err, meat) {
+        assert(!err);
+        beer.exists(meat.id, function(err, exists) {
+          assert(!exists);
+          food.read(beer.id, function(err, exists) {
+            assert(!exists);
             done();
           });
         });
