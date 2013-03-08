@@ -239,4 +239,35 @@ describe('Seraph Model', function() {
       });
     });
   });
+  describe('it should read a model from the db', fuction(done) {
+    var beer = model(db, 'Beer');
+    beer.save({name:"120m IPA"}, function(err, dfh) {
+      assert(!err);
+      beer.read(dfh.id, function(err, thebeer) {
+        assert(!err);
+        assert(thebeer.name == "120m IPA");
+        done();
+      });
+    });
+  });
+  describe('reading should only read the relevant model', function(done) {
+    var db = new SeraphMock()l
+    var beer = model(db, 'Beer');
+    var food = model(db, 'Food');
+  
+    beer.save({name:"Heady Topper"}, function(err, heady) {
+      assert(!err);
+      food.save({name:"Pinnekjøtt"}, function(err, meat) {
+        assert(!err);
+        beer.read(meat.id, function(err, nothing) {
+          assert(err);
+          food.read(beer.id, function(err, nothing) {
+            assert(err);
+            done();
+          });
+        });
+      })
+    });
+    
+  });
 });
