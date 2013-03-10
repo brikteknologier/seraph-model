@@ -37,7 +37,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 
 ## Model instance methods
 * [model.read](#read)
-* [model.exists(#exists)
+* [model.exists](#exists)
 * [model.save](#save)
 * [model.findAll](#findAll)
 * [model.where](#where)
