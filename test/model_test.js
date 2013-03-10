@@ -276,9 +276,9 @@ describe('Seraph Model', function() {
       food.save({name:"Pinnekjøtt"}, function(err, meat) {
         assert(!err);
         beer.read(meat.id, function(err, nothing) {
-          assert(err);
+          assert(!nothing);
           food.read(beer.id, function(err, nothing) {
-            assert(err);
+            assert(!nothing);
             done();
           });
         });
