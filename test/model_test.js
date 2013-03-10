@@ -18,6 +18,9 @@ function SeraphMock() {
     };
   }
 
+  self._getId = function(obj) {
+    return obj;
+  };
   ['save', 'index', 'find'].forEach(mockMethod);
 }
 util.inherits(SeraphMock, Emitter);
@@ -124,7 +127,7 @@ describe('Seraph Model', function() {
       });
       beer.index(ipa, function(err, ipa) {
         assert(!err);
-        assert(indexCount == 2);
+        assert(indexCount == 3, indexCount);
         done();
       });
     });
