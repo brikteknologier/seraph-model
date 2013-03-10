@@ -2,6 +2,7 @@ var assert = require('assert');
 var model = require('../');
 var Emitter = require('events').EventEmitter;
 var util = require('util');
+var seraph = require('disposable-seraph');
 
 function SeraphMock() {
   Emitter.call(this);
@@ -22,6 +23,22 @@ function SeraphMock() {
 util.inherits(SeraphMock, Emitter);
 
 describe('Seraph Model', function() {
+  var neo;
+  var db;
+  before(function(done) {
+    seraph(function(err, _db, _neo) {
+      if (err) return done(err);
+      db = _db;
+      neo = _neo;
+      done();
+    });
+  });
+
+  after(function(done) {
+    neo.stop(function(err) {
+      neo.clean(done);
+    });
+  });
   describe('validation', function() {
     it('should fail save call when validation fails', function(done) {
       var mockdb = new SeraphMock();
@@ -239,10 +256,10 @@ describe('Seraph Model', function() {
       });
     });
   });
-  describe('it should read a model from the db', function(done) {
-    var beer = model(new SeraphMock(), 'Beer');
+  it('it should read a model from the db', function(done) {
+    var beer = model(db, 'Beer');
     beer.save({name:"120m IPA"}, function(err, dfh) {
-      assert(!err);
+      assert(!err,err);
       beer.read(dfh.id, function(err, thebeer) {
         assert(!err);
         assert(thebeer.name == "120m IPA");
@@ -250,8 +267,7 @@ describe('Seraph Model', function() {
       });
     });
   });
-  describe('reading should only read the relevant model', function(done) {
-    var db = new SeraphMock();
+  it('reading should only read the relevant model', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
   
@@ -270,8 +286,8 @@ describe('Seraph Model', function() {
     });
     
   });
-  describe('it should check if a model exists', function(done) {
-    var beer = model(new SeraphMock(), 'Beer');
+  it('it should check if a model exists', function(done) {
+    var beer = model(db, 'Beer');
     beer.save({name:"120m IPA"}, function(err, dfh) {
       assert(!err);
       beer.exists(dfh.id, function(err, exists) {
@@ -281,9 +297,8 @@ describe('Seraph Model', function() {
       });
     });
   });
-  describe('exists should only return true for the relevant model', 
+  it('exists should only return true for the relevant model', 
   function(done) {
-    var db = new SeraphMock();
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
   
