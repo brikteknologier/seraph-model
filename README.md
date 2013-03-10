@@ -36,6 +36,8 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [Setting a properties whitelist](#settingfields)
 
 ## Model instance methods
+* [model.read](#read)
+* [model.exists(#exists)
 * [model.save](#save)
 * [model.findAll](#findAll)
 * [model.where](#where)
@@ -57,6 +59,9 @@ itself.
 It works by indexing each object under a `nodes` index. Each different model is
 simply an item in that index, with all of the instances of that model attached
 to it.
+
+Each model is also indexed by its id upon saving the first time. This ensures
+that when reading models, you do not read models of other types.
 
 ### Example
 ```javascript
@@ -212,6 +217,17 @@ Saves or updates an object in the database. The steps for doing this are:
 The object returned is given an ID. See
 [seraph.save](https://github.com/brikteknologier/seraph#node.save) for more 
 information and an example (they are operationally identical).
+
+<a name="read"/>
+## model.read(idOrObject, callback(err, model))
+
+Reads a model from the database given an id or an object containing the id. 
+`model` is either the returned object or `false` if it was not found.
+
+<a name="exists"/>
+## model.exists(idOrObject, callback(err, doesExist))
+
+Check if a model exists.
 
 <a name="findAll"/>
 ## model.findAll(callback(err, allOfTheseModels))
