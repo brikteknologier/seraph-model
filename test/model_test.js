@@ -320,4 +320,28 @@ describe('Seraph Model', function() {
     });
     
   });
+  describe('Composition', function() {
+    it('it should allow composing of models and save them properly', 
+    function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        assert(meal.id)
+        assert(meal.matchingBeers[0].id);
+        assert(meal.matchingBeers[1].id);
+        db.relationships(food, function(err, rels) {
+          assert(!err);
+          assert(rels.length == 2);
+          done();
+        });
+      });
+      
+    });
+  });
 });
