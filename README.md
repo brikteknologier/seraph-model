@@ -31,7 +31,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [Creating a new Model](#create)
 * [Adding preparers](#preparation)
 * [Adding validators](#validation)
-* [Adding indexers](#indexers)
+* [Adding indexes](#indexes)
 * [beforeSave/afterSave events](#saveevents)
 * [Setting a properties whitelist](#settingfields)
 
@@ -141,25 +141,51 @@ model.save({ name: 'Jordan', age: 17 }, function(err, person) {
 });
 ```
 
-<a name="indexers"/>
-## Adding indexers
-__Indexers__ are functions that are called with an object immediately after it
-has been saved for the first time.
+<a name="indexes"/>
+## Adding indexes
 
-They are passed the object and a callback: you are expected to do all of the
-indexing yourself. The callback takes one argument, an `err`. This is a
-dangerous place to return an error however, as the afterSave event has not yet
-been fired, but the object _has_ been saved. Regardless, returning an error here
-will trigger the callback of the entire save event immediately, with the error
-you pass. The afterSave event will not be fired.
+### `addIndex(indexName, key, value[, shouldIndex])`
 
-You can manually index an object by calling `model.index(obj, callback)`.
+You can add any number of indexes to add an object to upon saving by using the
+`addIndex` function. Objects are
+only indexed the first time they are saved, but you can manually index an object
+by calling the `index` function. 
+
+They keys and values passed to `addIndex` can be computed, but that is optional.
+If they are computed, you must pass the resultant key or value to a callback,
+rather than returning it (this gives you the opportunity to do asynchronous
+calculations at this point).
+
+You also have the option of passing a function to determine weather or not
+the index is used at all.
 
 ### Example 
 
+With static keys/values
+
 ```javascript
-model.on('index', function(obj, cb) {
-  db.index('wobblebangs', obj, 'uuid', createUuid(), cb);
+model.addIndex('wobblebangs', 'bangs', 'wobbly');
+```
+
+With computed value
+```javascript
+model.addIndex('uniquely_identified_stuff', 'stuff', function(obj, cb) {
+  cb(null, createUuid());
+});
+```
+
+With computed key and value
+```javascript
+model.addIndex('things',
+  function(obj, cb) { cb(null, obj.model); },
+  function(obj, cb) { cb(null, obj.id); });
+```
+
+With conditional indexing
+```javascript
+model.addIndex('some_stuff', 'things', 'cool', function(obj, cb) {
+  var isCoolEnough = obj.temperature < 20;
+  cb(null, isCoolEnough); //objs with `temperature` >= 20 are not indexed
 });
 ```
 
