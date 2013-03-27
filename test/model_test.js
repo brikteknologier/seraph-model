@@ -115,9 +115,7 @@ describe('Seraph Model', function() {
       var mockdb = new SeraphMock();
       var beer = model(mockdb, 'Beer');
       
-      beer.on('index', function(obj, cb) {
-        mockdb.index(obj, cb);
-      });
+      beer.addIndex('otherIndex', 'something', 'stuff');
       
       var ipa = {type: 'IPA', age: 25, id: 54};
       
@@ -193,7 +191,9 @@ describe('Seraph Model', function() {
         evfired = indexed;
       });
 
-      beer.on('index', function(obj,cb) { indexed = true, cb(); });
+      beer.addIndex('testthingy', 'stuff', function(obj,cb) { 
+        indexed = true, cb(null, 'thing');
+      });
 
       beer.save({type:'IPA'}, function(err,obj) {
         assert(evfired);
