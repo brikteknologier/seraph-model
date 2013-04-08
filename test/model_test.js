@@ -331,7 +331,6 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-        console.log(err);
         assert(!err);
         assert(meal.id)
         assert(meal.matchingBeers[0].id);
@@ -343,6 +342,87 @@ describe('Seraph Model', function() {
         });
       });
       
+    });
+    it('it should fire the before and after save events for composed models', 
+    function(done) {
+      var beforeBeerSaveCount = 0,
+          afterBeerSaveCount = 0,
+          beforeFoodSaveCount = 0,
+          afterFoodSaveCount = 0;
+
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+
+      beer.on('beforeSave', function() { ++beforeBeerSaveCount });
+      beer.on('afterSave', function() { ++afterBeerSaveCount });
+      food.on('beforeSave', function() { ++beforeFoodSaveCount });
+      food.on('afterSave', function() { ++afterFoodSaveCount });
+
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        assert(beforeBeerSaveCount == 2);
+        assert(afterBeerSaveCount == 2);
+        assert(beforeFoodSaveCount == 1);
+        assert(afterFoodSaveCount == 1);
+        done();
+      });
+      
+    });
+    it('should handle presave async transforms', 
+    function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      
+      beer.on('prepare', function(obj, cb) {
+        setTimeout(function() {
+          obj.thingy = "prepared";
+          cb(null, obj);
+        }, 20);
+      });
+
+      food.on('prepare', function(obj, cb) {
+        setTimeout(function() {
+          obj.otherthing = "prepared?";
+          cb(null, obj);
+        }, 20);
+      });
+
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        assert(meal.otherthing == 'prepared?');
+        assert(meal.matchingBeers[0].thingy == 'prepared');
+        assert(meal.matchingBeers[1].thingy == 'prepared');
+        done();
+      });
+      
+    });
+
+    it('should properly index models', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        db.index('nodes', 'Beer', meal.matchingBeers[0], function(err, node) {
+          assert(!err);
+          assert(node);
+          assert(node.id == meal.matchingBeers[0].id);
+        });
+      });
     });
   });
 });
