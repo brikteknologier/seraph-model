@@ -197,8 +197,6 @@ There's a few events you can listen on:
 * `beforeSave` fired after preparation and validation, but before saving.
 * `afterSave` fired after saving and indexing. 
 
-These listeners do not take a callback.
-
 ### Example
 
 ```javascript
