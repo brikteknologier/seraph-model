@@ -331,11 +331,12 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
+        console.log(err);
         assert(!err);
         assert(meal.id)
         assert(meal.matchingBeers[0].id);
         assert(meal.matchingBeers[1].id);
-        db.relationships(food, function(err, rels) {
+        db.relationships(meal, function(err, rels) {
           assert(!err);
           assert(rels.length == 2);
           done();
