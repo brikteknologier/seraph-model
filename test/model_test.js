@@ -343,6 +343,37 @@ describe('Seraph Model', function() {
       });
       
     });
+    it('it should allow more than one level of nested composition', 
+    function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      var hop = model(db, 'Hop');
+      food.compose(beer, 'matchingBeers', 'matches');
+      beer.compose(hop, 'hops', 'contains_hop');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper", hops: {name: 'CTZ'}},
+        {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
+      ]}, function(err, meal) {
+        assert(!err);
+        assert(meal.id)
+        assert(meal.matchingBeers[0].id);
+        assert(meal.matchingBeers[1].id);
+        assert(meal.matchingBeers[0].hops.id)
+        assert(meal.matchingBeers[1].hops[0].id);
+        assert(meal.matchingBeers[1].hops[1].id);
+        db.relationships(meal, function(err, rels) {
+          assert(!err);
+          assert(rels.length == 2);
+          db.relationships(meal.matchingBeers[1], 'out', function(err, rels) {
+            assert(!err)
+            assert(rels.length == 2);
+            done();
+          });
+        });
+      });
+      
+    });
     it('it should fire the before and after save events for composed models', 
     function(done) {
       var beforeBeerSaveCount = 0,
@@ -417,11 +448,13 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-        db.index('nodes', 'Beer', meal.matchingBeers[0], function(err, node) {
-          assert(!err);
-          assert(node);
-          assert(node.id == meal.matchingBeers[0].id);
-        });
+          db.index.read('nodes', 'Beer', meal.matchingBeers[0].id, 
+          function(err, node) {
+            assert(!err, err);
+            assert(node);
+            assert(node.id == meal.matchingBeers[0].id);
+            done();
+          });
       });
     });
   });
