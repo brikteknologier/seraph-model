@@ -84,19 +84,21 @@ describe('Seraph Model', function() {
       }); 
     });
     it ('should manually index an object', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
       
-      var ipa = {type: 'IPA', age: 25, id: 54};
+      var ipa = {type: 'IPA', age: 25};
       
-      var hasBeenIndexed = false;
-      mockdb.on('index', function(args) {
-        hasBeenIndexed = true;
-      });
-      beer.index(ipa, function(err, ipa) {
+      db.save(ipa, function(err, ipa) {
         assert(!err);
-        assert(hasBeenIndexed);
-        done();
+        beer.index(ipa, function(err, ipa) {
+          assert(!err);
+          db.index.read('nodes', 'Beer', ipa.id, function(err, node) {
+            assert(!err);
+            assert(!!node);
+            assert.deepEqual(node,ipa);
+            done();
+          });
+        });
       });
     });
     it ('should add to more than one index', function(done) {
