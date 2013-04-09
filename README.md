@@ -245,7 +245,7 @@ expand depending on the level and complexity of your compositions.
 
 **example**
 
-```
+```javascript
 var beer = model(db, "Beer");
 var hop = model(db, "Hop");
 
