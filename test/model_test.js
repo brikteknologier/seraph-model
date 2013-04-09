@@ -102,21 +102,23 @@ describe('Seraph Model', function() {
       });
     });
     it ('should add to more than one index', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
       
       beer.addIndex('otherIndex', 'something', 'stuff');
       
-      var ipa = {type: 'IPA', age: 25, id: 54};
-      
-      var indexCount = 0;
-      mockdb.on('index', function(args) {
-        indexCount++;
-      });
-      beer.index(ipa, function(err, ipa) {
+      var ipa = {type: 'IPA', age: 25};
+
+      beer.save(ipa, function(err, ipa) {
         assert(!err);
-        assert(indexCount == 3, indexCount);
-        done();
+        db.index.read('otherIndex', 'something', 'stuff', function(err,nodes) {
+          assert(!err);
+          assert(nodes);
+          if (!Array.isArray(nodes)) nodes = [nodes];
+          assert(!!_.find(nodes, function(node) {
+            return node.id == ipa.id;
+          }));
+          done();
+        });
       });
     });
   });
