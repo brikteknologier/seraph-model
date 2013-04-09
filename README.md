@@ -34,6 +34,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [Adding indexes](#indexes)
 * [beforeSave/afterSave events](#saveevents)
 * [Setting a properties whitelist](#settingfields)
+* [Composition of models](#composition)
 
 ## Model instance methods
 * [model.read](#read)
@@ -226,6 +227,88 @@ beer.save({
   // theBeer -> { name: 'Rye IPA', brewery: 'Lervig', style: 'IPA', id: 0 }
 })
 ```
+
+<a name="composition"/>
+## Composition of Models.
+
+Composition allows you to relate two models so that you can save nested objects
+faster, and atomically. When two models are composed, even though you might be
+saving 10 objects, only 2 api calls (saving & indexing) will be made, just as if 
+you were only saving 1. 
+
+With this, you can also nest objects, which can make your life a bit easier when
+saving large objects.
+
+**Composited objects will also be implicitly retrieved when reading from the
+database, to infinite depth.** The number of read API calls is variable, and will
+expand depending on the level and complexity of your compositions.
+
+**example**
+
+```
+var beer = model(db, "Beer");
+var hop = model(db, "Hop");
+
+beer.compose(hop, 'hops', 'contains_hop');
+
+var pliny = {
+  name: 'Pliny the Elder',
+  brewery: 'Russian River',
+  hops: [
+    { name: 'Columbus', aa: '13.9%' },
+    { name: 'Simcoe', aa: '12.3%' },
+    { name: 'Centennial', aa: '8.0%' }
+  ]
+};
+
+// Since objects were listed on the 'hops' key that I specified, they will be 
+// saved with the `hop` model, and then related back to my beer.
+beer.save(pliny, function(err, saved) {
+  // if any of the hops or the beer failed validation with their model, err
+  // will be populated and nothing will be saved.
+  
+  console.log(saved); 
+  /* -> { brewery: 'Russian River',
+          name: 'Pliny the Elder',
+          id: 11,
+          hops: 
+           [ { name: 'Columbus', aa: '13.9%', id: 12 },
+             { name: 'Simcoe', aa: '12.3%', id: 13 },
+             { name: 'Centennial', aa: '8.0%', id: 14 } ] }
+  */
+
+  db.relationships(saved, function(err, rels) {
+    console.log(rels) // -> [ { start: 11, end: 12, type: 'contains_hop', properties: {}, id: 0 },
+                      // { start: 11, end: 13, type: 'contains_hop', properties: {}, id: 1 },
+                      // { start: 11, end: 14, type: 'contains_hop', properties: {}, id: 2 } ]
+  });
+
+  beer.read(saved, function(err, readPliny) {
+    console.log(readPliny)
+    /* -> { brewery: 'Russian River',
+            name: 'Pliny the Elder',
+            id: 11,
+            hops: 
+             [ { name: 'Columbus', aa: '13.9%', id: 12 },
+               { name: 'Simcoe', aa: '12.3%', id: 13 },
+               { name: 'Centennial', aa: '8.0%', id: 14 } ] }
+    */
+  });
+
+  hop.read(14, function(err, hop) {
+    console.log(hop); // -> { name: 'Centennial', aa: '8.0%', id: 14 }
+  });
+});
+```
+
+### model.compose(composedModel, key, relationshipName)
+
+* `composedModel` — the model which is being composed
+* `key` — the key on an object being saved which will contained the composed 
+  models.
+* `relationshipName` — the name of the relationship that is created between
+  a root model and its composed models. These relationships are always outgoing.
+
 
 <a name="save"/>
 ## model.save(object(s), callback(err, savedObject))
