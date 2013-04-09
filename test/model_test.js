@@ -33,7 +33,7 @@ describe('Seraph Model', function() {
       if (err) return done(err);
       db = _db;
       neo = _neo;
-      done();
+      setTimeout(function(){done()}, 250);
     });
   });
 
@@ -331,7 +331,7 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-        assert(!err);
+        assert(!err,err);
         assert(meal.id)
         assert(meal.matchingBeers[0].id);
         assert(meal.matchingBeers[1].id);
@@ -448,13 +448,36 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-          db.index.read('nodes', 'Beer', meal.matchingBeers[0].id, 
-          function(err, node) {
-            assert(!err, err);
+        db.index.read('nodes', 'Beer', meal.matchingBeers[0].id, 
+        function(err, node) {
+          assert(!err, err);
+          assert(node);
+          assert(node.id == meal.matchingBeers[0].id);
+          db.index.read('nodes', 'Food', meal.id, function(err, node) {
             assert(node);
-            assert(node.id == meal.matchingBeers[0].id);
+            assert(node.id == meal.id);
             done();
           });
+        });
+      });
+    });
+
+    it('should implicitly read compositions when reading', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        food.read(meal, function(err, readMeal) {
+          assert(!err);
+          assert.deepEqual(meal, readMeal);
+          done();
+        });
       });
     });
   });
