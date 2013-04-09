@@ -474,7 +474,29 @@ describe('Seraph Model', function() {
       ]}, function(err, meal) {
         assert(!err);
         food.read(meal, function(err, readMeal) {
-          assert(!err);
+          assert(!err,err);
+          assert.deepEqual(meal, readMeal);
+          done();
+        });
+      });
+    });
+
+    it('should read recursive compositions', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      var hop = model(db, 'Hop');
+      var aa = model(db, 'AlphaAcid');
+      food.compose(beer, 'matchingBeers', 'matches');
+      beer.compose(hop, 'hops', 'contains_hop');
+      hop.compose(hop, 'aa', 'has_aa');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper", hops: {name: 'CTZ',aa:{percent:'15%'}}},
+        {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
+      ]}, function(err, meal) {
+        assert(!err);
+        food.read(meal, function(err, readMeal) {
+          assert(!err,err);
           assert.deepEqual(meal, readMeal);
           done();
         });
