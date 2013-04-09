@@ -124,8 +124,7 @@ describe('Seraph Model', function() {
   });
   describe('save events', function() {
     it('should fire the beforeSave event', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
 
       var evfired = false;
       beer.on('beforeSave', function() {
@@ -139,8 +138,7 @@ describe('Seraph Model', function() {
       });
     });
     it('should fire the afterSave event', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
 
       var evfired = false;
       beer.on('afterSave', function() {
@@ -154,8 +152,7 @@ describe('Seraph Model', function() {
       });
     });
     it('should fire the beforeSave event after prep & val', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
 
       var evfired = false;
       var validated = false;
@@ -174,8 +171,7 @@ describe('Seraph Model', function() {
       });
     });
     it('should fire the afterSever event after indexing', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
 
       var evfired = false;
       var indexed = false;
