@@ -3,27 +3,7 @@ var model = require('../');
 var Emitter = require('events').EventEmitter;
 var util = require('util');
 var seraph = require('disposable-seraph');
-
-function SeraphMock() {
-  Emitter.call(this);
-  var self = this;
-
-  self.options = {id: 'id'};
-
-  function mockMethod(methodName) {
-    self[methodName] = function() {
-      var args = [].slice.call(arguments);
-      self.emit(methodName, args);
-      args.pop()(null, args.unshift());
-    };
-  }
-
-  self._getId = function(obj) {
-    return obj;
-  };
-  ['save', 'index', 'find'].forEach(mockMethod);
-}
-util.inherits(SeraphMock, Emitter);
+var _ = require('underscore');
 
 describe('Seraph Model', function() {
   var neo;
@@ -44,39 +24,44 @@ describe('Seraph Model', function() {
   });
   describe('validation', function() {
     it('should fail save call when validation fails', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
       beer.on('validate', function(beer, callback) {
         callback(beer.age > 15 ? 'fail!' : null);
       });
 
-      mockdb.on('save', function() {
-        assert.fail('called save', 'should not call save');
-        done();
-      });
-
       var ipa = {type:'IPA', age:25};
-      beer.save(ipa, function(err, ipa) {
+      beer.save(ipa, function(err, savedipa) {
         assert.ok(err);
+        assert(!savedipa);
+        assert(!ipa.id);
         done();
       })
     });
   });
   describe('indexing', function() {
     it ('should index a new object', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
       
       var ipa = {type: 'IPA', age: 25};
       
-      var hasBeenIndexed = false;
-      mockdb.on('index', function(args) {
-        hasBeenIndexed = true;
-      });
       beer.save(ipa, function(err, ipa) {
         assert(!err);
-        assert(hasBeenIndexed);
-        done();
+        db.index.read('nodes', 'type', 'Beer', function(err, nodes) {
+          assert(!err);
+          assert(nodes);
+          if (!Array.isArray(nodes)) nodes = [nodes];
+          
+          assert(!!_.find(nodes, function(node) {
+            return node.id == ipa.id;
+          }));
+
+          db.index.read('nodes', 'Beer', ipa.id, function(err, node) {
+            assert(!err);
+            assert(!!node);
+            assert.deepEqual(node, ipa);
+            done();
+          });
+        });
       });
     });
     it ('should not index an old object', function(done) {
