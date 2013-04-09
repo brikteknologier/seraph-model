@@ -206,27 +206,23 @@ describe('Seraph Model', function() {
       });
     });
     it('should fail save call when a preparer fails', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
       beer.on('prepare', function(beer, callback) {
         callback('fail!');
       });
 
-      mockdb.on('save', function() {
-        assert.fail('called save', 'should not call save');
-        done();
-      });
-
       var ipa = {type:'IPA', age:10};
-      beer.save(ipa, function(err, ipa) {
+      beer.save(ipa, function(err, sipa) {
         assert.ok(err);
+        assert(!sipa);
+        assert(!ipa.id);
         done();
       })
     });
   });
   describe('whitelisting/fields', function() {
     it('should whitelist a series of properties', function(done) {
-      var beer = model(new SeraphMock(), 'Beer');
+      var beer = model(db, 'Beer');
       beer.fields = [ 'type', 'brewery', 'name' ];
 
       var ipa = {type:'IPA', brewery:'Lervig', name:'Rye IPA', country:'Norway'};
@@ -238,7 +234,7 @@ describe('Seraph Model', function() {
       });
     });
     it('should not whitelist any fields by default', function(done) {
-      var beer = model(null, 'Beer');
+      var beer = model(db, 'Beer');
       var ipa = {type:'IPA', brewery:'Lervig', name:'Rye IPA', country:'Norway'};
       beer.prepare(ipa, function(err, preparedIpa) {
         assert.ok(!err);
