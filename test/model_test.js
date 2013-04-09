@@ -65,20 +65,23 @@ describe('Seraph Model', function() {
       });
     });
     it ('should not index an old object', function(done) {
-      var mockdb = new SeraphMock();
-      var beer = model(mockdb, 'Beer');
+      var beer = model(db, 'Beer');
       
-      var ipa = {type: 'IPA', age: 25, id: 54};
-      
-      var hasBeenIndexed = false;
-      mockdb.on('index', function(args) {
-        hasBeenIndexed = true;
-      });
+      var ipa = {type: 'IPA', age: 25};
       beer.save(ipa, function(err, ipa) {
         assert(!err);
-        assert(!hasBeenIndexed);
-        done();
-      });
+        db.index.remove('nodes', ipa.id, 'Beer', ipa.id, function(err) {
+          assert(!err, err);
+          beer.save(ipa, function(err) {
+            assert(!err);
+            db.index.read('nodes', 'Beer', ipa.id, function(err, node) {
+              assert(!err);
+              assert(!node);
+              done();
+            });
+          });
+        });
+      }); 
     });
     it ('should manually index an object', function(done) {
       var mockdb = new SeraphMock();
