@@ -253,6 +253,28 @@ describe('Seraph Model', function() {
         done();
       });
     });
+    it('should not introduce a whitelist on composing if there wasnt one',
+    function(done) {
+      var beer = model(db, 'Beer');
+      var hop = model(db, 'Hop');
+      beer.compose(hop, 'hops');
+      assert(beer.fields.length == 0);
+      beer.fields = ['potato', 'hair'];
+      assert(beer.fields.length == 2);
+      done();
+    });
+    it('should not matter which order comps and fields were added', 
+    function(done) {
+      var beer = model(db, 'Beer');
+      var hop = model(db, 'Hop');
+      beer.compose(hop, 'hops');
+      beer.fields = [ 'type', 'brewery', 'name' ];
+      beer.prepare({name:'Fjellblek', hops:[{name:'El Dorado'}]}, function(e, o) {
+        assert(!e);
+        assert(o.hops[0].name == 'El Dorado');
+        done();
+      });
+    });
   });
   it('it should read a model from the db', function(done) {
     var beer = model(db, 'Beer');
