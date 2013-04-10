@@ -242,6 +242,17 @@ describe('Seraph Model', function() {
         done();
       });
     });
+    it('should not remove composed fields', function(done) {
+      var beer = model(db, 'Beer');
+      var hop = model(db, 'Hop');
+      beer.fields = [ 'type', 'brewery', 'name' ];
+      beer.compose(hop, 'hops');
+      beer.prepare({name:'Fjellblek', hops:[{name:'El Dorado'}]}, function(e, o) {
+        assert(!e);
+        assert(o.hops[0].name == 'El Dorado');
+        done();
+      });
+    });
   });
   it('it should read a model from the db', function(done) {
     var beer = model(db, 'Beer');
