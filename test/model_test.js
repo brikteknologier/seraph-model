@@ -519,5 +519,27 @@ describe('Seraph Model', function() {
         });
       });
     });
+
+    it('should read a single composited property', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      var hop = model(db, 'Hop');
+      var aa = model(db, 'AlphaAcid');
+      food.compose(beer, 'matchingBeers', 'matches');
+      beer.compose(hop, 'hops', 'contains_hop');
+      hop.compose(hop, 'aa', 'has_aa');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper", hops: {name: 'CTZ',aa:{percent:'15%'}}},
+        {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
+      ]}, function(err, meal) {
+        assert(!err);
+        food.readComposition(meal, 'matchingBeers', function(err, hops) {
+          assert(!err,err);
+          assert.deepEqual(hops, meal.matchingBeers);
+          done();
+        });
+      });
+    });
   });
 });

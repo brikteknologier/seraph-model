@@ -303,12 +303,33 @@ beer.save(pliny, function(err, saved) {
 
 ### model.compose(composedModel, key, relationshipName)
 
+Add a composition.
+
 * `composedModel` — the model which is being composed
 * `key` — the key on an object being saved which will contained the composed 
   models.
 * `relationshipName` — the name of the relationship that is created between
   a root model and its composed models. These relationships are always outgoing.
 
+### model.readComposition(objectOrId, compositionKey, callback)
+
+Read a single composition from a model.
+
+* `objectOrId` — an id or an object that contains an id that refers to a model.
+* `compositionKey` – the composition which to retrieve.
+* `callback` — callback for result, format (err, resultingComp). `resulingComp`
+  will either be an array of composed objects or a single object if there was
+  only one
+
+Example (from the above context)
+```javascript
+beer.readComposition(pliny, 'hops', function(err, hops) {
+  console.log(hops); 
+  /* [ { name: 'Columbus', aa: '13.9%', id: 12 },
+      { name: 'Simcoe', aa: '12.3%', id: 13 },
+      { name: 'Centennial', aa: '8.0%', id: 14 } ]  */
+});
+```
 
 <a name="save"/>
 ## model.save(object(s), callback(err, savedObject))
