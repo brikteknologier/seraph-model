@@ -283,6 +283,16 @@ beer.save(pliny, function(err, saved) {
                       // { start: 11, end: 14, type: 'contains_hop', properties: {}, id: 2 } ]
   });
 
+  // Read directly with seraph
+  db.read(saved, function(err, readPlinyFromDb) {
+    console.log(readPliny)
+    /* -> { brewery: 'Russian River',
+            name: 'Pliny the Elder',
+            id: 11 }
+    */
+  })
+
+  // Read with model, and you get compositions implicitly.
   beer.read(saved, function(err, readPliny) {
     console.log(readPliny)
     /* -> { brewery: 'Russian River',
