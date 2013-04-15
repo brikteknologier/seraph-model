@@ -311,6 +311,15 @@ beer.save(pliny, function(err, saved) {
 });
 ```
 
+### Updating models with compositions
+
+You can use the regular `model.save` function to update a model with 
+compositions on it. If the compositions differ from the previous version of the
+model, the relationships to the previously composed nodes will be deleted **but
+the nodes themselves will not be**. If you want to update the base model but
+don't want the overhead that the compositions involves, you should just use
+`db.save` rather than `model.save`.
+
 ### model.compose(composedModel, key, relationshipName)
 
 Add a composition.
