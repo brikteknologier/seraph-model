@@ -597,5 +597,29 @@ describe('Seraph Model', function() {
         });
       });
     });
+
+    it('should support partial composition collection pushes', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save(
+        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} }, 
+        function(err, meal) {
+          assert(!err);
+          meal.matchingBeers = [meal.matchingBeers,{ name: "Imperialfjellet" }]
+          food.save(meal, function(err, meal) {
+            assert(!err);
+            food.read(meal, function(err, meal) {
+              assert(!err)
+              assert(meal.name == 'Pinnekjøtt');
+              assert(meal.matchingBeers.length == 2);
+              assert(meal.matchingBeers[0].name == 'Heady Topper');
+              assert(meal.matchingBeers[1].name == 'Imperialfjellet');
+              done();
+            });
+          });
+        });
+    });
   });
 });
