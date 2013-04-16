@@ -306,6 +306,23 @@ describe('Seraph Model', function() {
     });
     
   });
+  it('should save a model with a string id', function(done) {
+    var beer = model(db, 'Beer');
+    var food = model(db, 'Food');
+    beer.compose(food, 'food')
+  
+    beer.save({name:"Heady Topper"}, function(err, heady) {
+      assert(!err);
+      heady.ponies = 10;
+      heady.id = heady.id + '';
+      console.log(heady);
+      beer.save(heady, function(err, heady) {
+        assert(!err)
+        assert(heady.ponies == 10);
+        done();
+      });
+    });
+  });
   it('it should check if a model exists', function(done) {
     var beer = model(db, 'Beer');
     beer.save({name:"120m IPA"}, function(err, dfh) {
