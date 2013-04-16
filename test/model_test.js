@@ -315,7 +315,6 @@ describe('Seraph Model', function() {
       assert(!err);
       heady.ponies = 10;
       heady.id = heady.id + '';
-      console.log(heady);
       beer.save(heady, function(err, heady) {
         assert(!err)
         assert(heady.ponies == 10);
