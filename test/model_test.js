@@ -123,6 +123,41 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('changing the name after construction should not break indexes', 
+    function(done) {
+      var beer = model(db);
+
+      beer.type = 'Beer';
+
+      beer.save({name:'Mega Amazing Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.name == 'Mega Amazing Ale');
+        db.index.read('nodes', 'Beer', ale.id, function(err, indexedAle) {
+          assert(!err);
+          assert.deepEqual(indexedAle, ale);
+          done();
+        });
+      });
+    });
+    it('adding an index before changing name should not be destructive', 
+    function(done) {
+      var beer = model(db);
+
+      beer.addIndex('mega_index', 'omg', function(beer, cb) {
+        cb(null, beer.id);
+      });
+      beer.type = 'Beer';
+
+      beer.save({name:'Mega Amazing Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.name == 'Mega Amazing Ale');
+        db.index.read('mega_index', 'omg', ale.id, function(err, indexedAle) {
+          assert(!err);
+          assert.deepEqual(indexedAle, ale);
+          done();
+        });
+      });
+    });
   });
   describe('save events', function() {
     it('should fire the beforeSave event', function(done) {
