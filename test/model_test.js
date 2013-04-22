@@ -13,10 +13,12 @@ describe('Seraph Model', function() {
       if (err) return done(err);
       db = _db;
       neo = _neo;
-      setTimeout(function(){done()}, 250);
+      setTimeout(function() {
+        db.index.create('nodes', done);
+      }, 250);
     });
   });
-
+  
   after(function(done) {
     neo.stop(function(err) {
       neo.clean(done);
@@ -636,6 +638,18 @@ describe('Seraph Model', function() {
             });
           });
         });
+    });
+
+    it('should give a usable reply when asked for nonexistent data', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+
+      food.read({id: 5318008}, function(err, fud) {
+        assert(!err);
+        assert.strictEqual(fud, false);
+        done();
+      });
     });
   });
 });
