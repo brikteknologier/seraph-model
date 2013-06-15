@@ -211,7 +211,7 @@ model.on('beforeSave', function(obj) {
 
 __Fields__ are a way of whitelisting which properties are allowed on an object 
 to be saved. Upon saving, all properties which are not in the whitelist are 
-stripped.
+stripped. Composited properties are automatically whitelisted.
 
 ### Example
 
@@ -407,7 +407,8 @@ the `model.validators` array. For more information, see
 
 This is an array of property names which acts as a whitelist for property names
 in objects to be saved. If it is set, any properties in objects to be saved that
-are not included in this array are stripped. See 
+are not included in this array are stripped. Composited properties are 
+automatically whitelisted. See 
 [Setting a properties whitelist](#settingfields) for more information and
 examples.
 
