@@ -7,7 +7,7 @@ typed nodes from a neo4j database. It is intended to work with
 
 ```javascript
 var db = require('seraph')('http://localhost:7474')
-var model = require('seraph_model');
+var model = require('seraph-model');
 
 var User = model(db, 'user');
 
