@@ -675,6 +675,21 @@ describe('Seraph Model', function() {
         });
     });
 
+    it('should not convert a single-el array to an object', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches', true);
+    
+      food.save(
+        {name:"Pinnekjøtt", matchingBeers: [{name:"Heady Topper"}] }, 
+        function(err, meal) {
+          assert(!err);
+          assert(Array.isArray(meal.matchingBeers));
+          assert(meal.matchingBeers[0].name == "Heady Topper");
+          done()
+        });
+    });
+
     it('should give a usable reply when asked for nonexistent data', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
