@@ -320,7 +320,7 @@ the nodes themselves will not be**. If you want to update the base model but
 don't want the overhead that the compositions involves, you should just use
 `db.save` rather than `model.save`.
 
-### model.compose(composedModel, key, relationshipName)
+### model.compose(composedModel, key, relationshipName[, many])
 
 Add a composition.
 
@@ -329,6 +329,8 @@ Add a composition.
   models.
 * `relationshipName` — the name of the relationship that is created between
   a root model and its composed models. These relationships are always outgoing.
+* `many` (optional) — whether this is a *-to-many relationship. If truthy, the
+  this composition will always be represented as an array on the base object.
 
 ### model.readComposition(objectOrId, compositionKey, callback)
 

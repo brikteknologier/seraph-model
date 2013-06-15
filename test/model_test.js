@@ -686,7 +686,11 @@ describe('Seraph Model', function() {
           assert(!err);
           assert(Array.isArray(meal.matchingBeers));
           assert(meal.matchingBeers[0].name == "Heady Topper");
-          done()
+          food.read(meal, function(err, otherMeal) {
+            assert(Array.isArray(otherMeal.matchingBeers));
+            assert(otherMeal.matchingBeers[0].name == "Heady Topper");
+            done()
+          })
         });
     });
 
