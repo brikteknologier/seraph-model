@@ -13,6 +13,9 @@
     "disposable-seraph": "~0.1.8",
     "collect": "~0.3.5"
   },
+  "peerDependencies": {
+    "seraph": "~0.6.0"
+  },
   "devDependencies": {
     "mocha": "*",
     "disposable-seraph": "~0.1.4"
