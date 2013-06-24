@@ -19,6 +19,6 @@
   },
   "devDependencies": {
     "mocha": "*",
-    "disposable-seraph": "~0.1.4"
+    "disposable-seraph": "~0.2.5"
   }
 }
