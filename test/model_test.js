@@ -706,4 +706,64 @@ describe('Seraph Model', function() {
       });
     });
   });
+
+  describe('uniqueness', function() {
+    it('should be able to set a unique key', function(done) {
+      var beer = model(db, 'Beer');
+      beer.setUniqueKey('name', false);
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.id);
+        assert.equal(ale.name, 'Pacific Ale');
+        beer.save({name: 'Pacific Ale'}, function(err, ale) {
+          assert(!ale);
+          assert(err);
+          assert.equal(err.statusCode, 409);
+          done();
+        });
+      });
+    });
+
+    it('should be able to set a unique key and use return-old mode', 
+    function(done) {
+      var beer = model(db, 'Beer');
+      beer.setUniqueKey('name', true);
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.id);
+        assert.equal(ale.name, 'Pacific Ale');
+        beer.save({name: 'Pacific Ale', otherThing: 1}, function(err, ale2) {
+          assert(!err);
+          assert.deepEqual(ale, ale2);
+          assert.ok(!ale2.otherThing);
+          beer.read(ale.id, function(err, ale3) {
+            assert(!err);
+            assert(!ale3.otherThing);
+            assert.deepEqual(ale, ale3);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should enforce uniqueness on composed models', function(done) {
+      var beer = model(db, 'Beer');
+      beer.setUniqueKey('name', false);
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+      beer.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}}, 
+      function(err, meal) {
+        assert(!err);
+        assert(meal.id);
+        assert.equal(meal.name, 'Burrito');
+        meal.matchingBeers = {name: 'Pacific Ale'};
+        beer.save(meal, function(err, meal) {
+          assert(!meal);
+          assert(err);
+          assert.equal(err.statusCode, 409);
+          done();
+        });
+      });
+    });
+  });
 });
