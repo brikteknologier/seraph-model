@@ -724,6 +724,24 @@ describe('Seraph Model', function() {
       });
     });
 
+    it('should be able to set a unique index', function() {
+      var beer = model(db, 'Beer');
+      var uniqueId = Date.now()
+      beer.setUniqueIndex('uniqueything', 'beer', 
+        function(cb) { cb(null, uniqueId) }, false);
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.id);
+        assert.equal(ale.name, 'Pacific Ale');
+        beer.save({name: 'Pacific Ale'}, function(err, ale) {
+          assert(!ale);
+          assert(err);
+          assert.equal(err.statusCode, 409);
+          done();
+        });
+      });
+    });
+
     it('should be able to set a unique key and use return-old mode', 
     function(done) {
       var beer = model(db, 'Beer');
