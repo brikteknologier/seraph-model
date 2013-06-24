@@ -728,7 +728,7 @@ describe('Seraph Model', function() {
       var beer = model(db, 'Beer');
       var uniqueId = Date.now()
       beer.setUniqueIndex('uniqueything', 'beer', 
-        function(cb) { cb(null, uniqueId) }, false);
+        function(obj, cb) { cb(null, uniqueId) }, false);
       beer.save({name: 'Pacific Ale'}, function(err, ale) {
         assert(!err);
         assert(ale.id);
