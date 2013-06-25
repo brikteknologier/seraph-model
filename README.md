@@ -448,7 +448,7 @@ Car.save({make: 'Citroën', model: 'DS4'}, function(err, ds4) {
 ```
 
 <a name="save"/>
-## model.save(object(s), callback(err, savedObject))
+## `model.save(object(s), callback(err, savedObject))`
 
 Saves or updates an object in the database. The steps for doing this are:
 
@@ -463,23 +463,23 @@ The object returned is given an ID. See
 information and an example (they are operationally identical).
 
 <a name="read"/>
-## model.read(idOrObject, callback(err, model))
+## `model.read(idOrObject, callback(err, model))`
 
 Reads a model from the database given an id or an object containing the id. 
 `model` is either the returned object or `false` if it was not found.
 
 <a name="exists"/>
-## model.exists(idOrObject, callback(err, doesExist))
+## `model.exists(idOrObject, callback(err, doesExist))`
 
 Check if a model exists.
 
 <a name="findAll"/>
-## model.findAll(callback(err, allOfTheseModels))
+## `model.findAll(callback(err, allOfTheseModels))`
 
 Finds all of the objects that were saved with this type.
 
 <a name="where"/>
-## model.where(callback(err, matchingModels))
+## `model.where(callback(err, matchingModels))`
 
 This is a operationally similar to 
 [seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
@@ -487,20 +487,20 @@ restricted to searching for other objects indexed as this kind of model. See the
 [quick example](#quick) for an example of this in action. 
 
 <a name="prepare"/>
-## model.prepare(object, callback(err, preparedObject))
+## `model.prepare(object, callback(err, preparedObject))`
 
 Prepares an object by using the `model.preparers` array of functions to mutate
 it. For more information, see [Adding preparers](#preparation)
 
 <a name="validate"/>
-## model.validate(object, callback(err, preparedObject))
+## `model.validate(object, callback(err, preparedObject))`
 
 Validates that an object is ready for saving by calling each of the functions in
 the `model.validators` array. For more information, see 
 [Adding validators](#validation)
 
 <a name="fields"/>
-## model.fields
+## `model.fields`
 
 This is an array of property names which acts as a whitelist for property names
 in objects to be saved. If it is set, any properties in objects to be saved that
@@ -510,7 +510,7 @@ automatically whitelisted. See
 examples.
 
 <a name="setUniqueKey"/>
-## model.setUniqueKey(keyName, [returnOldOnConflict = false])
+## `model.setUniqueKey(keyName, [returnOldOnConflict = false])`
 
 Sets the key to uniquely index this model on. Will also enforce that this key
 exists when you try to save a model.
@@ -519,7 +519,7 @@ See the [using a unique key](#unique-key) section for more information and
 examples.
 
 <a name="setUniqueIndex"/>
-## `model.setUniqueIndex(indexName, key|keyResolver, value|valueResolver, [shouldIndex = undefined], [returnOldOnConflict = false])'
+## `model.setUniqueIndex(indexName, key|keyResolver, value|valueResolver, [shouldIndex = undefined], [returnOldOnConflict = false])'`
 
 Sets the index to use for enforcing uniqueness on this model.
 
@@ -528,7 +528,7 @@ and examples, or the [indexes](#indexes) section for an explanation of the
 key/value resolvers and the `shouldIndex` argument.
 
 <a name="cypherStart"/>
-## model.cypherStart()
+## `model.cypherStart()`
 
 Returns the appropriate START point for a cypher query for this kind of model.
 Example:
