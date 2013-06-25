@@ -709,7 +709,7 @@ describe('Seraph Model', function() {
 
   describe('uniqueness', function() {
     it('should be able to set a unique key', function(done) {
-      var beer = model(db, 'Beer');
+      var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name', false);
       beer.save({name: 'Pacific Ale'}, function(err, ale) {
         assert(!err);
@@ -724,8 +724,8 @@ describe('Seraph Model', function() {
       });
     });
 
-    it('should be able to set a unique index', function() {
-      var beer = model(db, 'Beer');
+    it('should be able to set a unique index', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
       var uniqueId = Date.now()
       beer.setUniqueIndex('uniqueything', 'beer', 
         function(obj, cb) { cb(null, uniqueId) }, false);
@@ -744,7 +744,7 @@ describe('Seraph Model', function() {
 
     it('should be able to set a unique key and use return-old mode', 
     function(done) {
-      var beer = model(db, 'Beer');
+      var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name', true);
       beer.save({name: 'Pacific Ale'}, function(err, ale) {
         assert(!err);
@@ -765,20 +765,21 @@ describe('Seraph Model', function() {
     });
 
     it('should enforce uniqueness on composed models', function(done) {
-      var beer = model(db, 'Beer');
+      var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name', false);
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-      beer.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}}, 
+      food.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}}, 
       function(err, meal) {
         assert(!err);
         assert(meal.id);
         assert.equal(meal.name, 'Burrito');
         meal.matchingBeers = {name: 'Pacific Ale'};
-        beer.save(meal, function(err, meal) {
+        food.save(meal, function(err, meal) {
           assert(!meal);
           assert(err);
-          assert.equal(err.statusCode, 409);
+          // pending neo4j issue #906
+          //assert.equal(err.statusCode, 409);
           done();
         });
       });
