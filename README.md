@@ -519,7 +519,7 @@ See the [using a unique key](#unique-key) section for more information and
 examples.
 
 <a name="setUniqueIndex"/>
-#### `model.setUniqueIndex(indexName, key|keyResolver, value|valueResolver, [shouldIndex = undefined], [returnOldOnConflict = false])'`
+#### model.setUniqueIndex(indexName, key|keyResolver, value|valueResolver, [shouldIndex = undefined], [returnOldOnConflict = false])'
 
 Sets the index to use for enforcing uniqueness on this model.
 
