@@ -35,6 +35,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [beforeSave/afterSave events](#saveevents)
 * [Setting a properties whitelist](#settingfields)
 * [Composition of models](#composition)
+* [Setting a unique key or index](#uniqueness)
 
 ## Model instance methods
 * [model.read](#read)
@@ -45,6 +46,8 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [model.prepare](#prepare)
 * [model.validate](#validate)
 * [model.fields](#fields)
+* [model.setUniqueKey](#setUniqueKey)
+* [model.setUniqueIndex](#setUniqueIndex)
 * [model.cypherStart](#cypherStart)
 
 <a name="create"/>
@@ -351,9 +354,101 @@ beer.readComposition(pliny, 'hops', function(err, hops) {
       { name: 'Centennial', aa: '8.0%', id: 14 } ]  */
 });
 ```
+<a name="uniqueness"/>
+## Setting a unique key or index 
+
+In neo4j, you can enforce uniqueness of nodes by associating them with an index.
+There's two ways of doing this with seraph-model: by specifying a key in the
+model to index upon, or by specifying the index yourself. See the examples below
+for specifying a unique index for a node.
+
+**Note** that there is one in particular "gotcha" with enforced uniqueness on 
+composed models: in the event that you try to add a new object and there is
+already an object indexed the same way, an error will be thrown. Unfortunately,
+due to [a bug](https://github.com/neo4j/neo4j/issues/906) with neo4j's batch
+API, and the fact that composed models always save in a batch, this means that
+a statusCode of 500 will be returned. There is in fact no good way to determine
+that such an error is, in fact, the result of a conflict, yet. 
+
+### Unique Key
+
+Specifying a unique key will automatically index your node under a new index,
+using that key in each saved model. The index is named after your model's `type`
+property. For example, a model with `model.type = 'car'` will be added under
+the index `cars`. The index name is automatically pluralized from the model type
+name. 
+
+If you specified the key as `model`, then each time an object is saved it is
+indexed (in this example) in the `cars` index, under the key `model`, with the
+value of whatever `model` was set to.
+
+Setting a unique key also automatically adds a validator checking that the
+indexed key was set on every object that is saved. An object will not be able to
+save without that key being set.
+
+For example:
+
+```javascript
+var Car = model(db, 'car');
+Car.setUniqueKey('model');
+Car.save({make: 'Citroën', model: 'DS4'}, function(err, ds4) {
+  // ds4 -> { id: 1, make: 'Citroën', model: 'DS4' }
+  // node 1 is now indexed in neo4j under `cars(model="DS4")`
+  Car.save({make: 'Toyota', model: 'DS4'}, function(err, otherDs4) {
+    // err.statusCode -> 409 (conflict)
+  });
+});
+
+Car.save({make: 'Subaru'}, function(err, subaru) {
+  // err -> 'The `model` key is not set, but is required to save this object'
+});
+```
+
+You can also specify that instead of returning a conflict error, that you want
+to just return the old object when you attempt to save a new one at the same
+index. For example:
+
+```javascript
+var Tag = model(db, 'tag');
+Tag.setUniqueKey('tag');
+Tag.save({tag: 'finnish'}, function(err, tag) {
+  // tag -> { id: 1, tag: 'finnish' }
+  
+  // presumably later on, someone wants to save the same tag 
+  Tag.save({tag: 'finnish'}, function(err, tag) {
+    // instead of saving another tag 'finnish', the first one was returned
+    // tag -> { id: 1, tag: 'finnish' }
+  });
+});
+```
+
+### Unique Index
+
+In case you want your unique index to be a little more involved than just using
+a value from the model, you can define your own unique index. The function you 
+use to do this is [model.setUniqueIndex](#setUniqueIndex), and it takes similar
+arguments to [model.addIndex](#indexes).
+
+Here's an example with the Car model shown above, which uses both the `make` and
+the `model` to uniquely index.
+
+```javascript
+var Car = model(db, 'car');
+Car.setUniqueIndex('cars', 'make_and_model', function(car, cb) {
+  if (!car.make || !car.model) cb("A car should have both a make and a model!");
+  else cb(null, car.make + ' ' + car.model);
+});
+
+Car.save({make: 'Citroën', model: 'DS4'}, function(err, ds4) {
+  db.index.read('cars', 'make_and_model', 'Citroën DS4', function(err, car) { 
+    // `ds4` was indexed under 'Citroën DS4'.
+    assert.deepEqual(ds4, car);
+  });
+});
+```
 
 <a name="save"/>
-## model.save(object(s), callback(err, savedObject))
+#### `model.save(object(s), callback(err, savedObject))`
 
 Saves or updates an object in the database. The steps for doing this are:
 
@@ -368,23 +463,23 @@ The object returned is given an ID. See
 information and an example (they are operationally identical).
 
 <a name="read"/>
-## model.read(idOrObject, callback(err, model))
+#### `model.read(idOrObject, callback(err, model))`
 
 Reads a model from the database given an id or an object containing the id. 
 `model` is either the returned object or `false` if it was not found.
 
 <a name="exists"/>
-## model.exists(idOrObject, callback(err, doesExist))
+#### `model.exists(idOrObject, callback(err, doesExist))`
 
 Check if a model exists.
 
 <a name="findAll"/>
-## model.findAll(callback(err, allOfTheseModels))
+#### `model.findAll(callback(err, allOfTheseModels))`
 
 Finds all of the objects that were saved with this type.
 
 <a name="where"/>
-## model.where(callback(err, matchingModels))
+#### `model.where(callback(err, matchingModels))`
 
 This is a operationally similar to 
 [seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
@@ -392,20 +487,20 @@ restricted to searching for other objects indexed as this kind of model. See the
 [quick example](#quick) for an example of this in action. 
 
 <a name="prepare"/>
-## model.prepare(object, callback(err, preparedObject))
+#### `model.prepare(object, callback(err, preparedObject))`
 
 Prepares an object by using the `model.preparers` array of functions to mutate
 it. For more information, see [Adding preparers](#preparation)
 
 <a name="validate"/>
-## model.validate(object, callback(err, preparedObject))
+#### `model.validate(object, callback(err, preparedObject))`
 
 Validates that an object is ready for saving by calling each of the functions in
 the `model.validators` array. For more information, see 
 [Adding validators](#validation)
 
 <a name="fields"/>
-## model.fields
+#### `model.fields`
 
 This is an array of property names which acts as a whitelist for property names
 in objects to be saved. If it is set, any properties in objects to be saved that
@@ -414,8 +509,26 @@ automatically whitelisted. See
 [Setting a properties whitelist](#settingfields) for more information and
 examples.
 
+<a name="setUniqueKey"/>
+#### `model.setUniqueKey(keyName, [returnOldOnConflict = false])`
+
+Sets the key to uniquely index this model on. Will also enforce that this key
+exists when you try to save a model.
+
+See the [using a unique key](#unique-key) section for more information and
+examples.
+
+<a name="setUniqueIndex"/>
+#### model.setUniqueIndex(indexName, key|keyResolver, value|valueResolver, [shouldIndex = undefined], [returnOldOnConflict = false])'
+
+Sets the index to use for enforcing uniqueness on this model.
+
+See the the [using a unique index](#unique-index) section for more information
+and examples, or the [indexes](#indexes) section for an explanation of the
+key/value resolvers and the `shouldIndex` argument.
+
 <a name="cypherStart"/>
-## model.cypherStart()
+#### `model.cypherStart()`
 
 Returns the appropriate START point for a cypher query for this kind of model.
 Example:
