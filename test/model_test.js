@@ -854,4 +854,84 @@ describe('Seraph Model', function() {
       });
     });
   });
+
+  describe('Calculated fields', function() {
+    it('should add a calculated field', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.addCalculatedField('title', function(obj) {
+        return obj.brewery + ' ' + obj.beer;
+      });
+      beer.save({
+        brewery: 'Sierra Nevada',
+        beer: 'Pale Ale'
+      }, function(err, brew) {
+        assert(!err);
+        assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+        beer.read(brew, function(err, brew) {
+          assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+          done();
+        });
+      });
+    });
+    it('shouldn\'t actually save calculated field', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.addCalculatedField('title', function(obj) {
+        return obj.brewery + ' ' + obj.beer;
+      });
+      beer.save({
+        brewery: 'Sierra Nevada',
+        beer: 'Pale Ale'
+      }, function(err, brew) {
+        assert(!err);
+        assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+        db.read(brew, function(err, brew) {
+          assert(!brew.title);
+          done();
+        });
+      });
+    });
+    it('should add an async calculated field', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.addCalculatedField('title', function(obj, cb) {
+        setTimeout(function() {
+          cb(null, obj.brewery + ' ' + obj.beer);
+        }, 200);
+      });
+      beer.save({
+        brewery: 'Sierra Nevada',
+        beer: 'Pale Ale'
+      }, function(err, brew) {
+        assert(!err);
+        assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+        beer.read(brew, function(err, brew) {
+          assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+          done();
+        });
+      });
+    });
+    it('should work on composed models', function(done) {
+      var food = model(db, 'Food'+Date.now());
+      var beer = model(db, 'Beer'+Date.now());
+      beer.addCalculatedField('title', function(obj, cb) {
+        setTimeout(function() {
+          cb(null, obj.brewery + ' ' + obj.beer);
+        }, 200);
+      });
+      food.compose(beer, 'beer', 'has_beer');
+      beer.save({
+        dish: 'Irish Stew',
+        beer: {
+          brewery: 'Nøgne Ø',
+          beer: 'Imperial Stout'
+        }
+      }, function(err, meal) {
+        assert(!err);
+        assert.equal(meal.beer.title, 'Sierra Nevada Pale Ale');
+        food.read(meal, function(err, meal) {
+          assert.equal(meal.beer.title, 'Sierra Nevada Pale Ale');
+          done();
+        });
+      });
+    });
+  });
 });
