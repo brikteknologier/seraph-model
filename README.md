@@ -36,6 +36,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [Setting a properties whitelist](#settingfields)
 * [Composition of models](#composition)
 * [Setting a unique key or index](#uniqueness)
+* [Computed fields](#computed-fields)
 
 ## Model instance methods
 * [model.read](#read)
@@ -49,6 +50,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [model.setUniqueKey](#setUniqueKey)
 * [model.setUniqueIndex](#setUniqueIndex)
 * [model.useTimestamps](#useTimestamps)
+* [model.addComputedField](#addComputeField)
 * [model.cypherStart](#cypherStart)
 
 <a name="create"/>
@@ -448,6 +450,37 @@ Car.save({make: 'Citroën', model: 'DS4'}, function(err, ds4) {
 });
 ```
 
+<a name="computed-fields"/>
+## Computed fields
+
+Computed fields are fields on a model that exist transiently (they aren't stored
+in the database) and can be composed of other fields on the object or external
+information. You specify the field that you want to be computed, and the function 
+that should be used to compute the value of that field for the model, and it will 
+automatically be computed every time the model is read (and removed from the
+model just before saving). You can use the [addComputedField](#addComputedField)
+to add a computed field.
+
+Example:
+
+```
+var Car = model(db, 'car');
+Car.addComputedField('name', function(car) {
+  return car.make + ' ' + car.model;
+});
+Car.addComputedField('popularity', function(car, cb) {
+  fetchPopularityRating(car.make, car.model, function(err, rating) {
+    if (err) return cb(err);
+    cb(null, rating.numberOfOwners);
+  });
+});
+
+Car.save({ make: 'Citroën', model: 'DS4' }, function(err, car) {
+  // car.name = 'Citroën DS4'
+  // car.popularity = 8599
+});
+```
+
 <a name="save"/>
 #### `model.save(object(s), callback(err, savedObject))`
 
@@ -533,6 +566,11 @@ key/value resolvers and the `shouldIndex` argument.
 
 If called, the model will add a `created` and `updated` timestamp field to each
 model that is saved. These are unix timestamps based on the server's time. 
+
+<a name="addComputedField"/>
+#### `model.addComputedField(fieldName, computer)`
+
+Add a [computed field](#computed-fields) to a model.
 
 <a name="cypherStart"/>
 #### `model.cypherStart()`
