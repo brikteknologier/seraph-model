@@ -807,4 +807,51 @@ describe('Seraph Model', function() {
       });
     });
   });
+
+  describe('Timestamps', function() {
+    it('should add timestamps', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.useTimestamps();
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.created);
+        assert(typeof ale.created == 'number');
+        assert(ale.created <= require('moment')().unix());
+        assert(ale.updated);
+        assert(typeof ale.updated == 'number');
+        assert(ale.updated <= require('moment')().unix());
+        done();
+      });
+    });
+
+    it('should add timestamps with custom names', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.useTimestamps('created_at', 'updated_at');
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.created_at);
+        assert(ale.updated_at);
+        assert(!ale.created);
+        assert(!ale.updated);
+        done();
+      });
+    });
+
+    it('should update the updated timestamp upon saving', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.useTimestamps();
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        var updated = ale.updated;
+        setTimeout(function() {
+          ale.amazing = 'thing';
+          beer.save(ale, function(err, ale) {
+            assert(!err);
+            assert(ale.updated > updated);
+            done()
+          });
+        }, 1000);
+      });
+    });
+  });
 });

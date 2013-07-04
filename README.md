@@ -48,6 +48,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [model.fields](#fields)
 * [model.setUniqueKey](#setUniqueKey)
 * [model.setUniqueIndex](#setUniqueIndex)
+* [model.useTimestamps](#useTimestamps)
 * [model.cypherStart](#cypherStart)
 
 <a name="create"/>
@@ -526,6 +527,12 @@ Sets the index to use for enforcing uniqueness on this model.
 See the the [using a unique index](#unique-index) section for more information
 and examples, or the [indexes](#indexes) section for an explanation of the
 key/value resolvers and the `shouldIndex` argument.
+
+<a name="useTimestamps"/>
+#### `model.useTimestamps([createdField = 'created', [updatedField = 'updated'])`
+
+If called, the model will add a `created` and `updated` timestamp field to each
+model that is saved. These are unix timestamps based on the server's time. 
 
 <a name="cypherStart"/>
 #### `model.cypherStart()`
