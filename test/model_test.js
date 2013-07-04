@@ -855,10 +855,10 @@ describe('Seraph Model', function() {
     });
   });
 
-  describe('Calculated fields', function() {
-    it('should add a calculated field', function(done) {
+  describe('Computed fields', function() {
+    it('should add a computed field', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.addCalculatedField('title', function(obj) {
+      beer.addComputedField('title', function(obj) {
         return obj.brewery + ' ' + obj.beer;
       });
       beer.save({
@@ -873,9 +873,9 @@ describe('Seraph Model', function() {
         });
       });
     });
-    it('shouldn\'t actually save calculated field', function(done) {
+    it('shouldn\'t actually save computed field', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.addCalculatedField('title', function(obj) {
+      beer.addComputedField('title', function(obj) {
         return obj.brewery + ' ' + obj.beer;
       });
       beer.save({
@@ -890,9 +890,9 @@ describe('Seraph Model', function() {
         });
       });
     });
-    it('should add an async calculated field', function(done) {
+    it('should add an async computed field', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.addCalculatedField('title', function(obj, cb) {
+      beer.addComputedField('title', function(obj, cb) {
         setTimeout(function() {
           cb(null, obj.brewery + ' ' + obj.beer);
         }, 200);
@@ -912,13 +912,13 @@ describe('Seraph Model', function() {
     it('should work on composed models', function(done) {
       var food = model(db, 'Food'+Date.now());
       var beer = model(db, 'Beer'+Date.now());
-      beer.addCalculatedField('title', function(obj, cb) {
+      beer.addComputedField('title', function(obj, cb) {
         setTimeout(function() {
           cb(null, obj.brewery + ' ' + obj.beer);
         }, 200);
       });
       food.compose(beer, 'beer', 'has_beer');
-      beer.save({
+      food.save({
         dish: 'Irish Stew',
         beer: {
           brewery: 'Nøgne Ø',
@@ -926,9 +926,10 @@ describe('Seraph Model', function() {
         }
       }, function(err, meal) {
         assert(!err);
-        assert.equal(meal.beer.title, 'Sierra Nevada Pale Ale');
+        assert.equal(meal.beer.title, 'Nøgne Ø Imperial Stout');
         food.read(meal, function(err, meal) {
-          assert.equal(meal.beer.title, 'Sierra Nevada Pale Ale');
+          assert(!err);
+          assert.equal(meal.beer.title, 'Nøgne Ø Imperial Stout');
           done();
         });
       });
