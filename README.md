@@ -92,6 +92,8 @@ passed to the save callback as if it were a validation error. However, if you
 just want to do validation and not mutate the object, use a
 [validator](#validation) instead.
 
+Preparers are called before validators.
+
 You can manually prepare an object by using the [model.prepare](#prepare)
 function.
 
@@ -122,6 +124,8 @@ mode.save({file: 'nonexistant.txt'}, function(err, object) {
 __Validators__ are functions that are called with an object before it is saved.
 If they call back with anything that is not falsy, the saving process is halted,
 and the error from the validator function is returned to the save callback.
+
+Validators are called after preparers.
 
 You can manually validate an object by using the [model.validate](#validate)
 function.
