@@ -653,6 +653,33 @@ describe('Seraph Model', function() {
       });
     });
 
+    it('should push to a composition', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        food.push(meal, 'matchingBeers', {name:'Super tasty ale'}, 
+        function(err, ale) {
+          assert(!err);
+          assert(ale.id);
+          assert.equal(ale.name, 'Super tasty ale');
+          food.read(meal, function(err, meal) {
+            assert(!err);
+            assert.deepEqual(meal.matchingBeers, [
+                {name: 'Heady Topper'},
+                {name: 'Hovistuten'},
+                {name: 'Super tasty ale'}
+              ]);
+            done()
+          });
+        });
+      });
+    });
+
     it('should support partial composition updates', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
