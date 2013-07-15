@@ -656,6 +656,7 @@ describe('Seraph Model', function() {
     it('should push to a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
     
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
@@ -669,12 +670,66 @@ describe('Seraph Model', function() {
           assert.equal(ale.name, 'Super tasty ale');
           food.read(meal, function(err, meal) {
             assert(!err);
-            assert.deepEqual(meal.matchingBeers, [
-                {name: 'Heady Topper'},
-                {name: 'Hovistuten'},
-                {name: 'Super tasty ale'}
-              ]);
+            assert.equal(meal.matchingBeers[0].name, 'Heady Topper');
+            assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
+            assert.equal(meal.matchingBeers[2].name, 'Super tasty ale');
             done()
+          });
+        });
+      });
+    });
+    it('should push multiple nodes to a composition', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        food.push(meal, 'matchingBeers', [{name:'Super tasty ale'}, 
+          {name:'Vildhjarta'}],
+        function(err, ale) {
+          assert(!err);
+          assert(ale[0].id);
+          assert(ale[1].id);
+          assert.equal(ale[0].name, 'Super tasty ale');
+          assert.equal(ale[1].name, 'Vildhjarta');
+          food.read(meal, function(err, meal) {
+            assert(!err);
+            assert.equal(meal.matchingBeers[0].name, 'Heady Topper');
+            assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
+            assert.equal(meal.matchingBeers[2].name, 'Super tasty ale');
+            assert.equal(meal.matchingBeers[3].name, 'Vildhjarta');
+            done()
+          });
+        });
+      });
+    });
+    it('should push saved nodes to a composition', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        beer.save({name:'Super tasty ale'}, function(err, tastyAle) {
+          assert(!err);
+          food.push(meal, 'matchingBeers', tastyAle, function(err, ale) {
+            assert(!err);
+            assert(ale.id);
+            assert.equal(ale.name, 'Super tasty ale');
+            food.read(meal, function(err, meal) {
+              assert(!err);
+              assert.equal(meal.matchingBeers[0].name, 'Heady Topper');
+              assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
+              assert.equal(meal.matchingBeers[2].name, 'Super tasty ale');
+              done()
+            });
           });
         });
       });
