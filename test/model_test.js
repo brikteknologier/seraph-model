@@ -413,6 +413,35 @@ describe('Seraph Model', function() {
       });
       
     });
+    it('should allow implicit transformation of compositions', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err,err);
+        assert(meal.id)
+        assert(meal.matchingBeers[0].id);
+        assert(meal.matchingBeers[1].id);
+        beer.read(meal.matchingBeers[0].id, function(err, model) {
+          assert(!err);
+          assert.deepEqual(model, meal.matchingBeers[0]);
+          meal.matchingBeers.push({name: 'New Beer!'});
+          food.save(meal, function(err, meal) {
+            assert(!err);
+            assert.equal(meal.matchingBeers.length, 3)
+            beer.read(meal.matchingBeers[2].id, function(err, model) {
+              assert(!err)
+              assert.deepEqual(model, meal.matchingBeers[2]);
+              done()
+            });
+          });
+        });
+      });
+    });
     it('it should allow more than one level of nested composition', 
     function(done) {
       var beer = model(db, 'Beer');
