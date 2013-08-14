@@ -123,8 +123,7 @@ describe('Seraph Model', function() {
         });
       });
     });
-    it('changing the name after construction should not break indexes', 
-    function(done) {
+    it('changing the name after construction should not break indexes', function(done) {
       var beer = model(db);
 
       beer.type = 'Beer';
@@ -139,8 +138,7 @@ describe('Seraph Model', function() {
         });
       });
     });
-    it('adding an index before changing name should not be destructive', 
-    function(done) {
+    it('adding an index before changing name should not be destructive', function(done) {
       var beer = model(db);
 
       beer.addIndex('mega_index', 'omg', function(beer, cb) {
@@ -290,8 +288,7 @@ describe('Seraph Model', function() {
         done();
       });
     });
-    it('should not introduce a whitelist on composing if there wasnt one',
-    function(done) {
+    it('should not introduce a whitelist on composing if there wasnt one', function(done) {
       var beer = model(db, 'Beer');
       var hop = model(db, 'Hop');
       beer.compose(hop, 'hops');
@@ -300,8 +297,7 @@ describe('Seraph Model', function() {
       assert(beer.fields.length == 2);
       done();
     });
-    it('should not matter which order comps and fields were added', 
-    function(done) {
+    it('should not matter which order comps and fields were added', function(done) {
       var beer = model(db, 'Beer');
       var hop = model(db, 'Hop');
       beer.compose(hop, 'hops');
@@ -370,8 +366,7 @@ describe('Seraph Model', function() {
       });
     });
   });
-  it('exists should only return true for the relevant model', 
-  function(done) {
+  it('exists should only return true for the relevant model', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
   
@@ -390,9 +385,9 @@ describe('Seraph Model', function() {
     });
     
   });
+
   describe('Composition', function() {
-    it('it should allow composing of models and save them properly', 
-    function(done) {
+    it('it should allow composing of models and save them properly', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
@@ -442,8 +437,7 @@ describe('Seraph Model', function() {
         });
       });
     });
-    it('it should allow more than one level of nested composition', 
-    function(done) {
+    it('it should allow more than one level of nested composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       var hop = model(db, 'Hop');
@@ -473,8 +467,7 @@ describe('Seraph Model', function() {
       });
       
     });
-    it('it should fire the before and after save events for composed models', 
-    function(done) {
+    it('it should fire the before and after save events for composed models', function(done) {
       var beforeBeerSaveCount = 0,
           afterBeerSaveCount = 0,
           beforeFoodSaveCount = 0,
@@ -503,8 +496,7 @@ describe('Seraph Model', function() {
       });
       
     });
-    it('should handle presave async transforms', 
-    function(done) {
+    it('should handle presave async transforms', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       
@@ -536,7 +528,6 @@ describe('Seraph Model', function() {
       });
       
     });
-
     it('should properly index models', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -560,7 +551,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should implicitly read compositions when reading', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -579,7 +569,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should read recursive compositions', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -601,7 +590,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should read a single composited property', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -623,7 +611,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should update a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -652,7 +639,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should push to a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -678,6 +664,37 @@ describe('Seraph Model', function() {
         });
       });
     });
+
+    it('should order a composition', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches', {
+        orderBy: 'abv'
+      });
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper", abv:5},
+        {name:"Hovistuten", abv:4}
+      ]}, function(err, meal) {
+        assert(!err);
+        assert.equal(meal.matchingBeers[0].name, 'Hovistuten');
+        assert.equal(meal.matchingBeers[1].name, 'Heady Topper');
+        food.push(meal, 'matchingBeers', {name:'Super tasty ale', abv:3}, 
+        function(err, ale) {
+          assert(!err);
+          assert(ale.id);
+          assert.equal(ale.name, 'Super tasty ale');
+          food.read(meal, function(err, meal) {
+            assert(!err);
+            assert.equal(meal.matchingBeers[2].name, 'Heady Topper');
+            assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
+            assert.equal(meal.matchingBeers[0].name, 'Super tasty ale');
+            done()
+          });
+        });
+      });
+    });
+    
     it('should push multiple nodes to a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -734,7 +751,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should support partial composition updates', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -761,7 +777,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should support partial composition collection pushes', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -785,11 +800,10 @@ describe('Seraph Model', function() {
           });
         });
     });
-
     it('should not convert a single-el array to an object', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
-      food.compose(beer, 'matchingBeers', 'matches', true);
+      food.compose(beer, 'matchingBeers', 'matches', {many:true});
     
       food.save(
         {name:"Pinnekjøtt", matchingBeers: [{name:"Heady Topper"}] }, 
@@ -804,7 +818,6 @@ describe('Seraph Model', function() {
           })
         });
     });
-
     it('should give a usable reply when asked for nonexistent data', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -834,7 +847,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should be able to set a unique index', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       var uniqueId = Date.now()
@@ -852,9 +864,7 @@ describe('Seraph Model', function() {
         });
       });
     });
-
-    it('should be able to set a unique key and use return-old mode', 
-    function(done) {
+    it('should be able to set a unique key and use return-old mode', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name', true);
       beer.save({name: 'Pacific Ale'}, function(err, ale) {
@@ -874,7 +884,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should enforce uniqueness on composed models', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name', false);
@@ -895,7 +904,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should support updating', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name');
@@ -934,7 +942,6 @@ describe('Seraph Model', function() {
         done();
       });
     });
-
     it('should add timestamps with custom names', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.useTimestamps('created_at', 'updated_at');
@@ -947,7 +954,6 @@ describe('Seraph Model', function() {
         done();
       });
     });
-
     it('should update the updated timestamp upon saving', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.useTimestamps();
