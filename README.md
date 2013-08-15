@@ -582,6 +582,11 @@ key/value resolvers and the `shouldIndex` argument.
 If called, the model will add a `created` and `updated` timestamp field to each
 model that is saved. These are unix timestamps based on the server's time. 
 
+You can also use the `model.touch(node, callback)` function to update the
+`updated` timestamp without changing any of the node's properties. This is useful
+if you're updating composed models seperately but still want the base model to
+be updated.
+
 <a name="addComputedField"/>
 #### `model.addComputedField(fieldName, computer)`
 

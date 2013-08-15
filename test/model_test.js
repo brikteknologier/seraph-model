@@ -970,6 +970,21 @@ describe('Seraph Model', function() {
         }, 1000);
       });
     });
+    it('should update updated when touched', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.useTimestamps();
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        var updated = ale.updated;
+        setTimeout(function() {
+          beer.touch(ale, function(err, ale) {
+            assert(!err);
+            assert(ale.updated > updated);
+            done()
+          });
+        }, 1000);
+      });
+    });
   });
 
   describe('Computed fields', function() {
