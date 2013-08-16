@@ -408,6 +408,36 @@ describe('Seraph Model', function() {
       });
       
     });
+    it('it should allow exclusion of composed models on save', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err,err);
+        assert(meal.id)
+        assert(meal.matchingBeers[0].id);
+        assert(meal.matchingBeers[1].id);
+        meal.matchingBeers[0].name = 'Potato';
+        meal.matchingBeers[1].name = 'Gross';
+        meal.name = 'Burger';
+        food.save(meal, true, function(err, newMeal) {
+          assert(!err);
+          assert.equal(newMeal.name, 'Burger');
+          food.read(newMeal, function(err, newerMeal) {
+            assert(!err);
+            assert.equal(newerMeal.matchingBeers[0].name, 'Heady Topper');
+            assert.equal(newerMeal.matchingBeers[1].name, 'Hovistuten');
+            assert.equal(newerMeal.name, 'Burger');
+            done()
+          });
+        });
+      });
+      
+    });
     it('should allow implicit transformation of compositions', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
