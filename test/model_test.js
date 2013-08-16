@@ -85,6 +85,22 @@ describe('Seraph Model', function() {
         });
       }); 
     });
+    it ('should not throw an error if the nodes index doesn\'t exist', function(done) {
+      var beer = model(db, 'Beer');
+      var hop = model(db, 'Hop');
+      beer.compose(hop, 'hops', 'hoppedby');
+
+      beer.save({name:'Vildhjarta', hops:{name:'Centennial'}},function(e,b) {
+        db.node.index.delete('nodes', function(err) {
+          assert(!err);
+          
+          beer.read(b, function(err, ipa) {
+            assert(!err);
+            done()
+          });
+        });
+      });
+    });
     it ('should manually index an object', function(done) {
       var beer = model(db, 'Beer');
       
