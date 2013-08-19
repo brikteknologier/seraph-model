@@ -42,6 +42,8 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [model.read](#read)
 * [model.exists](#exists)
 * [model.save](#save)
+* [model.push](#push)
+* [model.saveComposition](#saveComposition)
 * [model.findAll](#findAll)
 * [model.where](#where)
 * [model.prepare](#prepare)
@@ -327,8 +329,14 @@ You can use the regular `model.save` function to update a model with
 compositions on it. If the compositions differ from the previous version of the
 model, the relationships to the previously composed nodes will be deleted **but
 the nodes themselves will not be**. If you want to update the base model but
-don't want the overhead that the compositions involves, you should just use
-`db.save` rather than `model.save`.
+don't want the overhead that the compositions involves, you can use `model.save`
+with `excludeCompositions` set to true. See the [model.save](#save) docs for
+more info.
+
+A couple of alternatives for updating compositions exist: [`model.push`](#push)
+for pushing a single object to a composition without having to first read the
+model from the database, and [`model.saveComposition`](#saveComposition) for 
+updating an entire composition in one go.
 
 ### model.compose(composedModel, key, relationshipName[, opts])
 
@@ -497,7 +505,7 @@ Car.save({ make: 'Citroën', model: 'DS4' }, function(err, car) {
 ```
 
 <a name="save"/>
-#### `model.save(object(s), callback(err, savedObject))`
+#### `model.save(object, [excludeCompositions,] callback(err, savedObject))`
 
 Saves or updates an object in the database. The steps for doing this are:
 
@@ -507,9 +515,22 @@ Saves or updates an object in the database. The steps for doing this are:
 3. `object` is saved using [seraph.save](https://github.com/brikteknologier/seraph#node.save)
 4. `object` is indexed as this type of model using [seraph.index](https://github.com/brikteknologier/seraph#node.index)
 
-The object returned is given an ID. See
-[seraph.save](https://github.com/brikteknologier/seraph#node.save) for more 
-information and an example (they are operationally identical).
+If `excludeCompositions` is truthy, any composed models attached to `object`
+will not be altered in the database (they will be ignored), and the object which 
+is returned will exclude compositions.
+
+<a name="push"/>
+#### `model.push(rootId, compName, object(s), callback(err, savedObject(s)))`
+
+Pushes a single object as a composed model on the model represented by `rootId`.
+This does not read the database first so there is no danger of a race condition.
+
+<a name="saveComposition"/>
+#### `model.saveComposition(rootId, compName, objects, callback(err, savedObjects))`
+
+Updates a composition set on a model. The models composed under `compName` on the
+model will be replaced with those specified by objects. This can be a partial
+update if you have an already existing array of composited objects.
 
 <a name="read"/>
 #### `model.read(idOrObject, callback(err, model))`

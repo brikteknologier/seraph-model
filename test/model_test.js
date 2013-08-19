@@ -454,6 +454,42 @@ describe('Seraph Model', function() {
       });
       
     });
+    it('it should allow saving of only a composition', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      var ingredient = model(db, 'Ingredient');
+      food.compose(beer, 'matchingBeers', 'matches', {many:true});
+      food.compose(ingredient, 'ingredients', 'contains', {many:true});
+    
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ], ingredients:[ {name: 'Lamb'}]}, function(err, meal) {
+        assert(!err,err);
+        var beers = [{name: 'Hopwired'}, {name: 'Hop Zombie'}, 
+                      meal.matchingBeers[0]];
+        food.saveComposition(meal.id, 'matchingBeers', beers, function(err, beers) {
+          assert(!err);
+          assert.equal(beers[0].name, 'Hopwired');
+          assert(beers[0].id);
+          food.read(meal.id, function(err, meal) {
+            assert(!err);
+            assert.equal(meal.name, 'Pinnekjøtt');
+            assert.equal(meal.ingredients[0].name, 'Lamb');
+
+            var beerNames = _.pluck(meal.matchingBeers, 'name');
+            
+            assert(_.contains(beerNames, 'Hopwired'));
+            assert(_.contains(beerNames, 'Hop Zombie'));
+            assert(_.contains(beerNames, 'Heady Topper'));
+            assert(!_.contains(beerNames, 'Hovistuten'));
+            
+            done();
+          });
+        });
+      });
+      
+    });
     it('should allow implicit transformation of compositions', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
