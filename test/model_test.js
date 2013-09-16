@@ -1024,6 +1024,21 @@ describe('Seraph Model', function() {
         done();
       });
     });
+    it('should add timestamps in ms', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.makeTimestamp = beer.timestampFactories.epochMilliseconds;
+      beer.useTimestamps();
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        assert(ale.created);
+        assert(typeof ale.created == 'number');
+        assert(ale.created <= require('moment')().valueOf());
+        assert(ale.updated);
+        assert(typeof ale.updated == 'number');
+        assert(ale.updated <= require('moment')().valueOf());
+        done();
+      });
+    });
     it('should add timestamps with custom names', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.useTimestamps('created_at', 'updated_at');

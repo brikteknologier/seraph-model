@@ -608,6 +608,25 @@ You can also use the `model.touch(node, callback)` function to update the
 if you're updating composed models seperately but still want the base model to
 be updated.
 
+##### Different timestamp formats
+
+By default, timestamps are a 
+[unix timestamp](https://en.wikipedia.org/wiki/Unix_time). You can change this
+by altering your model's `makeTimestamp` function. The function should return a
+value representing the current time.
+
+Seraph-model provides two of these functions for your convenience by default, 
+accessible on `model.timestampFactories`. They are:
+
+* `epochSeconds`: unix timestamp (default)
+* `epochMilliseconds`: unix offset (more accurate unix timestamp using ms)
+
+To use one of these, just assign it yourself like this:
+
+```javascript
+model.makeTimestamp = model.timestampFactories.epochMilliseconds;
+
+```
 <a name="addComputedField"/>
 #### `model.addComputedField(fieldName, computer)`
 
