@@ -1052,6 +1052,39 @@ describe('Seraph Model', function() {
         }, 1000);
       });
     });
+    it('should not update the created timestamp upon saving', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.useTimestamps();
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        var created = ale.created;
+        setTimeout(function() {
+          ale.amazing = 'thing';
+          beer.save(ale, function(err, ale) {
+            assert(!err);
+            assert(ale.created == created);
+            done()
+          });
+        }, 1000);
+      });
+    });
+    it('should not update the created timestamp upon saving with fields', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.fields = ['name'];
+      beer.useTimestamps();
+      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        assert(!err);
+        var created = ale.created;
+        setTimeout(function() {
+          ale.amazing = 'thing';
+          beer.save(ale, function(err, ale) {
+            assert(!err);
+            assert(ale.created == created);
+            done()
+          });
+        }, 1000);
+      });
+    });
     it('should update updated when touched', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.useTimestamps();
