@@ -1,5 +1,5 @@
 var assert = require('assert');
-var model = require('../');
+var model = require('../').model;
 var Emitter = require('events').EventEmitter;
 var util = require('util');
 var seraph = require('disposable-seraph');
@@ -7,7 +7,7 @@ var _ = require('underscore');
 
 var parseSchema = require('../lib/schema');
 
-describe.only('Seraph Schema', function() {
+describe('Seraph Schema', function() {
   var neo;
   var db;
   before(function(done) {
