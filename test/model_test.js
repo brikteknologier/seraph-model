@@ -1,5 +1,5 @@
 var assert = require('assert');
-var model = require('../');
+var model = require('../').model;
 var Emitter = require('events').EventEmitter;
 var util = require('util');
 var seraph = require('disposable-seraph');
@@ -18,7 +18,7 @@ describe('Seraph Model', function() {
       }, 250);
     });
   });
-  
+
   after(function(done) {
     neo.stop(function(err) {
       neo.clean(done);
@@ -43,16 +43,16 @@ describe('Seraph Model', function() {
   describe('indexing', function() {
     it ('should index a new object', function(done) {
       var beer = model(db, 'Beer');
-      
+
       var ipa = {type: 'IPA', age: 25};
-      
+
       beer.save(ipa, function(err, ipa) {
         assert(!err);
         db.index.read('nodes', 'type', 'Beer', function(err, nodes) {
           assert(!err);
           assert(nodes);
           if (!Array.isArray(nodes)) nodes = [nodes];
-          
+
           assert(!!_.find(nodes, function(node) {
             return node.id == ipa.id;
           }));
@@ -68,7 +68,7 @@ describe('Seraph Model', function() {
     });
     it ('should not index an old object', function(done) {
       var beer = model(db, 'Beer');
-      
+
       var ipa = {type: 'IPA', age: 25};
       beer.save(ipa, function(err, ipa) {
         assert(!err);
@@ -83,7 +83,7 @@ describe('Seraph Model', function() {
             });
           });
         });
-      }); 
+      });
     });
     it ('should not throw an error if the nodes index doesn\'t exist', function(done) {
       var beer = model(db, 'Beer');
@@ -93,7 +93,7 @@ describe('Seraph Model', function() {
       beer.save({name:'Vildhjarta', hops:{name:'Centennial'}},function(e,b) {
         db.node.index.delete('nodes', function(err) {
           assert(!err);
-          
+
           beer.read(b, function(err, ipa) {
             assert(!err);
             done()
@@ -103,9 +103,9 @@ describe('Seraph Model', function() {
     });
     it ('should manually index an object', function(done) {
       var beer = model(db, 'Beer');
-      
+
       var ipa = {type: 'IPA', age: 25};
-      
+
       db.save(ipa, function(err, ipa) {
         assert(!err);
         beer.index(ipa, function(err, ipa) {
@@ -121,9 +121,9 @@ describe('Seraph Model', function() {
     });
     it ('should add to more than one index', function(done) {
       var beer = model(db, 'Beer');
-      
+
       beer.addIndex('otherIndex', 'something', 'stuff');
-      
+
       var ipa = {type: 'IPA', age: 25};
 
       beer.save(ipa, function(err, ipa) {
@@ -230,7 +230,7 @@ describe('Seraph Model', function() {
         evfired = indexed;
       });
 
-      beer.addIndex('testthingy', 'stuff', function(obj,cb) { 
+      beer.addIndex('testthingy', 'stuff', function(obj,cb) {
         indexed = true, cb(null, 'thing');
       });
 
@@ -339,7 +339,7 @@ describe('Seraph Model', function() {
   it('reading should only read the relevant model', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
-  
+
     beer.save({name:"Heady Topper"}, function(err, heady) {
       assert(!err);
       food.save({name:"Pinnekjøtt"}, function(err, meat) {
@@ -353,13 +353,13 @@ describe('Seraph Model', function() {
         });
       })
     });
-    
+
   });
   it('should save a model with a string id', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
     beer.compose(food, 'food')
-  
+
     beer.save({name:"Heady Topper"}, function(err, heady) {
       assert(!err);
       heady.ponies = 10;
@@ -385,7 +385,7 @@ describe('Seraph Model', function() {
   it('exists should only return true for the relevant model', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
-  
+
     beer.save({name:"Heady Topper"}, function(err, heady) {
       assert(!err);
       food.save({name:"Pinnekjøtt"}, function(err, meat) {
@@ -399,7 +399,7 @@ describe('Seraph Model', function() {
         });
       })
     });
-    
+
   });
 
   describe('Composition', function() {
@@ -407,7 +407,7 @@ describe('Seraph Model', function() {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
@@ -422,13 +422,13 @@ describe('Seraph Model', function() {
           done();
         });
       });
-      
+
     });
     it('it should allow exclusion of composed models on save', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
@@ -452,7 +452,7 @@ describe('Seraph Model', function() {
           });
         });
       });
-      
+
     });
     it('it should allow saving of only a composition', function(done) {
       var beer = model(db, 'Beer');
@@ -460,13 +460,13 @@ describe('Seraph Model', function() {
       var ingredient = model(db, 'Ingredient');
       food.compose(beer, 'matchingBeers', 'matches', {many:true});
       food.compose(ingredient, 'ingredients', 'contains', {many:true});
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ], ingredients:[ {name: 'Lamb'}]}, function(err, meal) {
         assert(!err,err);
-        var beers = [{name: 'Hopwired'}, {name: 'Hop Zombie'}, 
+        var beers = [{name: 'Hopwired'}, {name: 'Hop Zombie'},
                       meal.matchingBeers[0]];
         food.saveComposition(meal.id, 'matchingBeers', beers, function(err, beers) {
           assert(!err);
@@ -478,23 +478,23 @@ describe('Seraph Model', function() {
             assert.equal(meal.ingredients[0].name, 'Lamb');
 
             var beerNames = _.pluck(meal.matchingBeers, 'name');
-            
+
             assert(_.contains(beerNames, 'Hopwired'));
             assert(_.contains(beerNames, 'Hop Zombie'));
             assert(_.contains(beerNames, 'Heady Topper'));
             assert(!_.contains(beerNames, 'Hovistuten'));
-            
+
             done();
           });
         });
       });
-      
+
     });
     it('should allow implicit transformation of compositions', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
@@ -525,7 +525,7 @@ describe('Seraph Model', function() {
       var hop = model(db, 'Hop');
       food.compose(beer, 'matchingBeers', 'matches');
       beer.compose(hop, 'hops', 'contains_hop');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper", hops: {name: 'CTZ'}},
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
@@ -547,7 +547,7 @@ describe('Seraph Model', function() {
           });
         });
       });
-      
+
     });
     it('it should fire the before and after save events for composed models', function(done) {
       var beforeBeerSaveCount = 0,
@@ -564,7 +564,7 @@ describe('Seraph Model', function() {
       food.on('afterSave', function() { ++afterFoodSaveCount });
 
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
@@ -576,12 +576,12 @@ describe('Seraph Model', function() {
         assert(afterFoodSaveCount == 1);
         done();
       });
-      
+
     });
     it('should handle presave async transforms', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
-      
+
       beer.on('prepare', function(obj, cb) {
         setTimeout(function() {
           obj.thingy = "prepared";
@@ -597,7 +597,7 @@ describe('Seraph Model', function() {
       });
 
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
@@ -608,19 +608,19 @@ describe('Seraph Model', function() {
         assert(meal.matchingBeers[1].thingy == 'prepared');
         done();
       });
-      
+
     });
     it('should properly index models', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
 
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-        db.index.read('nodes', 'Beer', meal.matchingBeers[0].id, 
+        db.index.read('nodes', 'Beer', meal.matchingBeers[0].id,
         function(err, node) {
           assert(!err, err);
           assert(node);
@@ -638,7 +638,7 @@ describe('Seraph Model', function() {
       var food = model(db, 'Food');
 
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
@@ -659,7 +659,7 @@ describe('Seraph Model', function() {
       food.compose(beer, 'matchingBeers', 'matches');
       beer.compose(hop, 'hops', 'contains_hop');
       hop.compose(hop, 'aa', 'has_aa');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper", hops: {name: 'CTZ',aa:{percent:'15%'}}},
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
@@ -680,7 +680,7 @@ describe('Seraph Model', function() {
       food.compose(beer, 'matchingBeers', 'matches');
       beer.compose(hop, 'hops', 'contains_hop');
       hop.compose(hop, 'aa', 'has_aa');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper", hops: {name: 'CTZ',aa:{percent:'15%'}}},
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
@@ -701,7 +701,7 @@ describe('Seraph Model', function() {
       food.compose(beer, 'matchingBeers', 'matches');
       beer.compose(hop, 'hops', 'contains_hop');
       hop.compose(hop, 'aa', 'has_aa');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper", hops: {name: 'CTZ',aa:{percent:'15%'}}},
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
@@ -725,13 +725,13 @@ describe('Seraph Model', function() {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
         assert(!err);
-        food.push(meal, 'matchingBeers', {name:'Super tasty ale'}, 
+        food.push(meal, 'matchingBeers', {name:'Super tasty ale'},
         function(err, ale) {
           assert(!err);
           assert(ale.id);
@@ -753,7 +753,7 @@ describe('Seraph Model', function() {
       food.compose(beer, 'matchingBeers', 'matches', {
         orderBy: 'abv'
       });
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper", abv:5},
         {name:"Hovistuten", abv:4}
@@ -761,7 +761,7 @@ describe('Seraph Model', function() {
         assert(!err);
         assert.equal(meal.matchingBeers[0].name, 'Hovistuten');
         assert.equal(meal.matchingBeers[1].name, 'Heady Topper');
-        food.push(meal, 'matchingBeers', {name:'Super tasty ale', abv:3}, 
+        food.push(meal, 'matchingBeers', {name:'Super tasty ale', abv:3},
         function(err, ale) {
           assert(!err);
           assert(ale.id);
@@ -776,18 +776,18 @@ describe('Seraph Model', function() {
         });
       });
     });
-    
+
     it('should push multiple nodes to a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
         assert(!err);
-        food.push(meal, 'matchingBeers', [{name:'Super tasty ale'}, 
+        food.push(meal, 'matchingBeers', [{name:'Super tasty ale'},
           {name:'Vildhjarta'}],
         function(err, ale) {
           assert(!err);
@@ -810,7 +810,7 @@ describe('Seraph Model', function() {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
@@ -841,7 +841,7 @@ describe('Seraph Model', function() {
       food.compose(beer, 'matchingBeers', 'matches');
       beer.compose(hop, 'hops', 'contains_hop');
       hop.compose(hop, 'aa', 'has_aa');
-    
+
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper", hops: {name: 'CTZ',aa:{percent:'15%'}}},
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
@@ -863,9 +863,9 @@ describe('Seraph Model', function() {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-    
+
       food.save(
-        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} }, 
+        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} },
         function(err, meal) {
           assert(!err);
           meal.matchingBeers = [meal.matchingBeers,{ name: "Imperialfjellet" }]
@@ -886,9 +886,9 @@ describe('Seraph Model', function() {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches', {many:true});
-    
+
       food.save(
-        {name:"Pinnekjøtt", matchingBeers: [{name:"Heady Topper"}] }, 
+        {name:"Pinnekjøtt", matchingBeers: [{name:"Heady Topper"}] },
         function(err, meal) {
           assert(!err);
           assert(Array.isArray(meal.matchingBeers));
@@ -932,7 +932,7 @@ describe('Seraph Model', function() {
     it('should be able to set a unique index', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       var uniqueId = Date.now()
-      beer.setUniqueIndex('uniqueything', 'beer', 
+      beer.setUniqueIndex('uniqueything', 'beer',
         function(obj, cb) { cb(null, uniqueId) }, false);
       beer.save({name: 'Pacific Ale'}, function(err, ale) {
         assert(!err);
@@ -971,7 +971,7 @@ describe('Seraph Model', function() {
       beer.setUniqueKey('name', false);
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
-      food.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}}, 
+      food.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}},
       function(err, meal) {
         assert(!err);
         assert(meal.id);
@@ -1120,9 +1120,9 @@ describe('Seraph Model', function() {
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
       food.useTimestamps();
-    
+
       food.save(
-        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} }, 
+        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} },
         function(err, meal) {
           assert(!err);
           var abeer = meal.matchingBeers;
@@ -1152,9 +1152,9 @@ describe('Seraph Model', function() {
         cyphers.push(cypher);
         _qraw.apply(db, arguments);
       };
-    
+
       food.save(
-        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} }, 
+        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} },
         function(err, meal) {
           assert(!err);
           setTimeout(function() {
