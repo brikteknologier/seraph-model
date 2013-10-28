@@ -13,7 +13,8 @@
     "collect": "~0.3.5",
     "inflection": "~1.2.6",
     "augur": "~1.0.2",
-    "moment": "~2.0.0"
+    "moment": "~2.0.0",
+    "disposable-seraph": "~0.2.7"
   },
   "peerDependencies": {
     "seraph": "~0.6.5"
