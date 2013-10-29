@@ -532,7 +532,7 @@ Each of the constraints and their behaviour are explained below.
   + [`'number'` or `Number`](#schema.type.number)
   + [`'array'` or `Array`](#schema.type.number)
   + [`'boolean'` or `Boolean`](#schema.type.number)
-  + Other types
+  + [Other types](#schema.type.others)
 * [`default`](#schema.default)
 * [`trim`](#schema.trim)
 * [`lowercase`](#schema.lowercase)
@@ -550,7 +550,7 @@ A `type` property on the schema indicates the type that this property should be.
 Upon saving, seraph-model will attempt to coerce properties that have a `type`
 specified into that type.
 
-<a name="schema.type.date">
+<a name="schema.type.date"/>
 ### `'date`' or `Date`
 
 Expects a date, and coerces it to a number using [`Date.getTime`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime).
@@ -563,6 +563,49 @@ new Date("2013-02-08T09:30:26")    ->   1360315826000
 "2013-02-08T09:30:26"              ->   1360315826000
 1360315826000                      ->   1360315826000
 ```
+
+<a name="schema.type.string"/>
+### `'string'` or `String`
+
+Expects a string. Values will be coerced to a string using `.toString()`.
+
+<a name="schema.type.number"/>
+### `'number'` or `Number`
+
+Expects a number. Values will be coerced to a number. If the coercion results
+in `NaN`, validation will fail.
+
+<a name="schema.type.boolean"/>
+### `'boolean'` or `Boolean`
+
+Expects a boolean. Values that are not already a boolean will be coerced based on
+their truthiness (i.e. `!!value`), with the exception of `'0'` which is coerced
+to `false`.
+
+<a name="schema.type.array"/>
+### `'array'` or `Array`
+
+Expects an array. If the value is not an array, it will be coerced to an array
+by inserting the value into an array and returning that.
+
+Examples of coercion:
+
+```
+[1,2,3]     -> [1,2,3]
+'cat'       -> ['cat']
+```
+
+<a name="schema.type.others"/>
+### Other types
+
+You can give your own types to check against. If `type` is set to a string value
+that is not one of the above, the value's type is checked with 
+`typeof value == type`. If `type` is a function, the value's type is checked with
+`value instanceof type`. 
+
+
+
+
 
 <a name="save"/>
 #### `model.save(object, [excludeCompositions,] callback(err, savedObject))`
