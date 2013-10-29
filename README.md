@@ -37,6 +37,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 * [Composition of models](#composition)
 * [Setting a unique key or index](#uniqueness)
 * [Computed fields](#computed-fields)
+* [Schemas](#schemas)
 
 ## Model instance methods
 * [model.read](#read)
@@ -502,6 +503,65 @@ Car.save({ make: 'Citroën', model: 'DS4' }, function(err, car) {
   // car.name = 'Citroën DS4'
   // car.popularity = 8599
 });
+```
+
+<a name="schemas"/>
+## Schemas
+
+Schemas are a way of defining some constraints on a model and enforcing them
+while saving. An example of a schema might be:
+
+```javascript
+var User = model(db, 'user');
+User.schema = {
+  name: { type: String, required: true },
+  email: { type: String, match: emailRegex, required: true },
+  age: { type: Number, min: 16, max: 85 },
+  expiry: Date
+}
+```
+
+Setting a schema will automatically use the keys of the schema as the model's
+[`fields`](#fields) property.
+
+Each of the constraints and their behaviour are explained below.
+
+* [`type`](#schema.type)
+  + [`'date`' or `Date`](#schema.type.date)
+  + [`'string'` or `String`](#schema.type.string)
+  + [`'number'` or `Number`](#schema.type.number)
+  + [`'array'` or `Array`](#schema.type.number)
+  + [`'boolean'` or `Boolean`](#schema.type.number)
+  + Other types
+* [`default`](#schema.default)
+* [`trim`](#schema.trim)
+* [`lowercase`](#schema.lowercase)
+* [`uppercase`](#schema.uppercase)
+* [`required`](#schema.required)
+* [`match`](#schema.match)
+* [`enum`](#schema.enum)
+* [`min`](#schema.min)
+* [`max`](#schema.max)
+
+<a name="schema.type">
+### `type`
+
+A `type` property on the schema indicates the type that this property should be.
+Upon saving, seraph-model will attempt to coerce properties that have a `type`
+specified into that type.
+
+<a name="schema.type.date">
+### `'date`' or `Date`
+
+Expects a date, and coerces it to a number using [`Date.getTime`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime).
+Values will be parsed using [Moment.js' date parser](http://momentjs.com/docs/#/parsing/).
+
+Examples of coercion:
+
+```
+new Date("2013-02-08T09:30:26")    ->   1360315826000
+"2013-02-08T09:30:26"              ->   1360315826000
+1360315826000                      ->   1360315826000
 ```
 
 <a name="save"/>
