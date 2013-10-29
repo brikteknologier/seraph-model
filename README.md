@@ -551,7 +551,7 @@ Upon saving, seraph-model will attempt to coerce properties that have a `type`
 specified into that type.
 
 <a name="schema.type.date"/>
-### `'date`' or `Date`
+#### `'date`' or `Date`
 
 Expects a date, and coerces it to a number using [`Date.getTime`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime).
 Values will be parsed using [Moment.js' date parser](http://momentjs.com/docs/#/parsing/).
@@ -565,25 +565,25 @@ new Date("2013-02-08T09:30:26")    ->   1360315826000
 ```
 
 <a name="schema.type.string"/>
-### `'string'` or `String`
+#### `'string'` or `String`
 
 Expects a string. Values will be coerced to a string using `.toString()`.
 
 <a name="schema.type.number"/>
-### `'number'` or `Number`
+#### `'number'` or `Number`
 
 Expects a number. Values will be coerced to a number. If the coercion results
 in `NaN`, validation will fail.
 
 <a name="schema.type.boolean"/>
-### `'boolean'` or `Boolean`
+#### `'boolean'` or `Boolean`
 
 Expects a boolean. Values that are not already a boolean will be coerced based on
 their truthiness (i.e. `!!value`), with the exception of `'0'` which is coerced
 to `false`.
 
 <a name="schema.type.array"/>
-### `'array'` or `Array`
+#### `'array'` or `Array`
 
 Expects an array. If the value is not an array, it will be coerced to an array
 by inserting the value into an array and returning that.
@@ -596,13 +596,12 @@ Examples of coercion:
 ```
 
 <a name="schema.type.others"/>
-### Other types
+#### Other types
 
 You can give your own types to check against. If `type` is set to a string value
 that is not one of the above, the value's type is checked with 
 `typeof value == type`. If `type` is a function, the value's type is checked with
 `value instanceof type`. 
-
 
 
 
