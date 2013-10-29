@@ -1,5 +1,5 @@
 var assert = require('assert');
-var model = require('../').model;
+var model = require('../');
 var Emitter = require('events').EventEmitter;
 var util = require('util');
 var seraph = require('disposable-seraph');
