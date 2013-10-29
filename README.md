@@ -527,7 +527,7 @@ Setting a schema will automatically use the keys of the schema as the model's
 Each of the constraints and their behaviour are explained below.
 
 * [`type`](#schema.type)
-  + [`'date`' or `Date`](#schema.type.date)
+  + [`'date'` or `Date`](#schema.type.date)
   + [`'string'` or `String`](#schema.type.string)
   + [`'number'` or `Number`](#schema.type.number)
   + [`'array'` or `Array`](#schema.type.number)
@@ -551,7 +551,7 @@ Upon saving, seraph-model will attempt to coerce properties that have a `type`
 specified into that type.
 
 <a name="schema.type.date"/>
-#### `'date`' or `Date`
+#### `'date'` or `Date`
 
 Expects a date, and coerces it to a number using [`Date.getTime`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime).
 Values will be parsed using [Moment.js' date parser](http://momentjs.com/docs/#/parsing/).
