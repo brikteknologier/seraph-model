@@ -603,8 +603,90 @@ that is not one of the above, the value's type is checked with
 `typeof value == type`. If `type` is a function, the value's type is checked with
 `value instanceof type`. 
 
+<a name="schema.default"/>
+### `default`
 
+Supply a default value for this property. If the property is undefined or null
+upon saving, the property will be set to this value.
 
+**Default value:** `undefined`.
+**Example values:** `'Anononymous User'`, `500`, `[1, 2, 3]`. 
+
+Example:
+
+```javascript
+User.schema = {
+  name: { default: 'Anonymous User' }
+}
+```
+
+<a name="schema.trim"/>
+### `trim`
+
+Trim leading/trailing whitespace from a string.
+
+**Default value:** `false`.
+**Example values:** `true`, `false`. 
+
+<a name="schema.uppercase"/>
+### `uppercase`
+
+Transform a string to uppercase.
+
+**Default value:** `false`.
+**Example values:** `true`, `false`. 
+
+<a name="schema.lowercase"/>
+### `lowercase`
+
+Transform a string to lowercase.
+
+**Default value:** `false`.
+**Example values:** `true`, `false`. 
+
+<a name="schema.required"/>
+### `required`
+
+Ensure this property exists. Validation will fail if it null or undefined.
+
+**Default value:** `false`.
+**Example values:** `true`, `false`. 
+
+<a name="schema.match"/>
+### `match`
+
+Values should match this regular expression. Validation will value if the value
+does not.
+
+**Default value:** `undefined`.
+**Example values:** `/^user/i`, `new RegExp("^user", "i")`. 
+
+<a name="schema.enum"/>
+### `enum`
+
+Values should be one of the values in the enum. Validation will fail if the value
+is not in the enum.
+
+**Default value:** `undefined`.
+**Example values:** `['male', 'female']`, `[10, 20, 30]`. 
+
+<a name="schema.min"/>
+### `min`
+
+Values should be greater than or equal to the given number. Validation will fail
+if the value is less.
+
+**Default value:** `undefined`.
+**Example values:** `10`, `0.05`. 
+
+<a name="schema.max"/>
+### `max`
+
+Values should be less than or equal to the given number. Validation will fail
+if the value is greater.
+
+**Default value:** `undefined`.
+**Example values:** `100`, `0.95`. 
 
 <a name="save"/>
 #### `model.save(object, [excludeCompositions,] callback(err, savedObject))`
