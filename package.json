@@ -16,7 +16,7 @@
     "moment": "~2.0.0"
   },
   "peerDependencies": {
-    "seraph": "~0.6.5"
+    "seraph": "~0.7.0"
   },
   "devDependencies": {
     "mocha": "*",
