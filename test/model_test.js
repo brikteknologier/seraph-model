@@ -1240,6 +1240,25 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('should compute fields when using `findAll`', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.addComputedField('stuff', function(stuff) {
+        return 'omg';
+      });
+      beer.save({name:'beer'}, function(err, beer1) {
+        assert(!err);
+        beer.save({name:'beer'}, function(err, beer2) {
+          assert(!err);
+          beer.findAll(function(err, beers) {
+            assert(!err);
+            assert(beers.length == 2);
+            assert.equal(beers[0].stuff, 'omg');
+            assert.equal(beers[1].stuff, 'omg');
+            done();
+          });
+        });
+      });
+    });
     it('should work on composed models', function(done) {
       var food = model(db, 'Food'+Date.now());
       var beer = model(db, 'Beer'+Date.now());
