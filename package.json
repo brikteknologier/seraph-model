@@ -15,9 +15,6 @@
     "augur": "~1.0.2",
     "moment": "~2.0.0"
   },
-  "peerDependencies": {
-    "seraph": "~0.7.0"
-  },
   "devDependencies": {
     "mocha": "*",
     "disposable-seraph": "~0.2.7"

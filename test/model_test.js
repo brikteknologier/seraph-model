@@ -9,7 +9,7 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.0.0-M06" }, function(err, _db, _neo) {
+    seraph({ version: "2.0.0-RC1" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
