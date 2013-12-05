@@ -402,7 +402,7 @@ describe('Seraph Model', function() {
 
   });
 
-  describe('Composition', function() {
+  describe('sm#Composition', function() {
     it('it should allow composing of models and save them properly', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
