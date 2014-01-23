@@ -660,7 +660,7 @@ describe('Seraph Model', function() {
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
       ]}, function(err, meal) {
         assert(!err);
-        food.read(meal, function(err, readMeal) {
+        food.read(meal, 3, function(err, readMeal) {
           assert(!err,err);
           assert.deepEqual(meal, readMeal);
           done();
