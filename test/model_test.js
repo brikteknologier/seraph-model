@@ -9,13 +9,11 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.0.0-RC1" }, function(err, _db, _neo) {
+    seraph({ version: "2.0.0" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
-      setTimeout(function() {
-        db.index.create('nodes', done);
-      }, 250);
+      done()
     });
   });
 
@@ -413,7 +411,7 @@ describe('Seraph Model', function() {
         {name:"Hovistuten"}
       ]}, function(err, meal) {
         assert(!err,err);
-        assert(meal.id)
+        assert(meal.id != null)
         assert(meal.matchingBeers[0].id);
         assert(meal.matchingBeers[1].id);
         db.relationships(meal, function(err, rels) {
