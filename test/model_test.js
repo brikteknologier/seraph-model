@@ -618,14 +618,11 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-        db.index.read('nodes', 'Beer', meal.matchingBeers[0].id,
-        function(err, node) {
+        db.readLabels(meal.matchingBeers[0].id, function(err, labels) {
           assert(!err, err);
-          assert(node);
-          assert(node.id == meal.matchingBeers[0].id);
-          db.index.read('nodes', 'Food', meal.id, function(err, node) {
-            assert(node);
-            assert(node.id == meal.id);
+          assert.equal(labels[0], 'Beer');
+          db.readLabels(meal.id, function(err, labels) {
+            assert.equal(labels[0], 'Food');
             done();
           });
         });
