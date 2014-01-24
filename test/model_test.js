@@ -660,7 +660,7 @@ describe('Seraph Model', function() {
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
       ]}, function(err, meal) {
         assert(!err);
-        food.read(meal, 3, function(err, readMeal) {
+        food.read(meal, 4, function(err, readMeal) {
           assert(!err,err);
           assert.deepEqual(meal, readMeal);
           done();
@@ -706,7 +706,7 @@ describe('Seraph Model', function() {
           {name: 'El Dorado',aa:{percent:'10%'}}};
         food.save(meal, function(err, meal) {
           assert(!err);
-          food.read(meal, function(err, meal) {
+          food.read(meal, 3,  function(err, meal) {
             assert(meal.name == 'Pinnekjøtt');
             assert(meal.matchingBeers.name == 'Blekfjellet');
             assert(meal.matchingBeers.hops.name == 'El Dorado');
