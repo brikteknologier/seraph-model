@@ -778,6 +778,7 @@ describe('Seraph Model', function() {
       var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name', true);
       beer.save({name: 'Pacific Ale'}, function(err, ale) {
+        console.log(err);
         assert(!err);
         assert(ale.id);
         assert.equal(ale.name, 'Pacific Ale');
