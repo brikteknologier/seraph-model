@@ -776,21 +776,21 @@ describe('Seraph Model', function() {
     });
     it('should be able to set a unique key and use return-old mode', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name', true);
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
-        console.log(err);
+      beer.setUniqueKey('name', true, function(err) {
         assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
-        beer.save({name: 'Pacific Ale', otherThing: 1}, function(err, ale2) {
+        beer.save({name: 'Pacific Ale'}, function(err, ale) {
           assert(!err);
-          assert.deepEqual(ale, ale2);
-          assert.ok(!ale2.otherThing);
-          beer.read(ale.id, function(err, ale3) {
+          assert(ale.id);
+          assert.equal(ale.name, 'Pacific Ale');
+          beer.save({name: 'Pacific Ale', otherThing: 1}, function(err, ale2) {
             assert(!err);
-            assert(!ale3.otherThing);
-            assert.deepEqual(ale, ale3);
-            done();
+            assert.equal(ale2.otherThing, 1);
+            beer.read(ale.id, function(err, ale3) {
+              assert(!err);
+              assert.equal(ale3.otherThing, 1);
+              assert.deepEqual(ale2, ale3);
+              done();
+            });
           });
         });
       });
