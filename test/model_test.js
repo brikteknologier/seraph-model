@@ -797,41 +797,42 @@ describe('Seraph Model', function() {
     });
     it('should enforce uniqueness on composed models', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name', false);
-      var food = model(db, 'Food');
-      food.compose(beer, 'matchingBeers', 'matches');
-      food.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}},
-      function(err, meal) {
-        assert(!err);
-        assert(meal.id);
-        assert.equal(meal.name, 'Burrito');
-        meal.matchingBeers = {name: 'Pacific Ale'};
-        food.save(meal, function(err, meal) {
-          assert(!meal);
-          assert(err);
-          // pending neo4j issue #906
-          //assert.equal(err.statusCode, 409);
-          done();
+      beer.setUniqueKey('name', false, function(err) {
+        var food = model(db, 'Food');
+        food.compose(beer, 'matchingBeers', 'matches');
+        food.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}},
+        function(err, meal) {
+          assert(!err);
+          assert(meal.id);
+          assert.equal(meal.name, 'Burrito');
+          meal.matchingBeers = {name: 'Pacific Ale'};
+          food.save(meal, function(err, meal) {
+            assert(!meal);
+            assert(err);
+            assert.equal(err.statusCode, 409);
+            done();
+          });
         });
       });
     });
     it('should support updating', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name');
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
-        assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
-        ale.otherThing = 1;
-        beer.save(ale, function(err, ale2) {
+      beer.setUniqueKey('name', function(err) {
+        beer.save({name: 'Pacific Ale'}, function(err, ale) {
           assert(!err);
-          assert.deepEqual(ale, ale2);
-          assert.ok(ale2.otherThing);
-          beer.read(ale.id, function(err, ale3) {
+          assert(ale.id);
+          assert.equal(ale.name, 'Pacific Ale');
+          ale.otherThing = 1;
+          beer.save(ale, function(err, ale2) {
             assert(!err);
-            assert(ale3.otherThing);
-            assert.deepEqual(ale, ale3);
-            done();
+            assert.deepEqual(ale, ale2);
+            assert.ok(ale2.otherThing);
+            beer.read(ale.id, function(err, ale3) {
+              assert(!err);
+              assert(ale3.otherThing);
+              assert.deepEqual(ale, ale3);
+              done();
+            });
           });
         });
       });
