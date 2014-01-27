@@ -86,25 +86,6 @@ describe('Seraph Model', function() {
         done();
       });
     });
-    it('should fire the afterSever event after indexing', function(done) {
-      var beer = model(db, 'Beer');
-
-      var evfired = false;
-      var indexed = false;
-      beer.on('afterSave', function() {
-        evfired = indexed;
-      });
-
-      beer.addIndex('testthingy', 'stuff', function(obj,cb) {
-        indexed = true, cb(null, 'thing');
-      });
-
-      beer.save({type:'IPA'}, function(err,obj) {
-        assert(evfired);
-        assert(!err);
-        done();
-      });
-    });
   });
   describe('preparation', function() {
     it('should transform the object by calling preparers', function(done) {
@@ -778,33 +759,18 @@ describe('Seraph Model', function() {
   describe('uniqueness', function() {
     it('should be able to set a unique key', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name', false);
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+      beer.setUniqueKey('name', false, function(err) {
         assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
         beer.save({name: 'Pacific Ale'}, function(err, ale) {
-          assert(!ale);
-          assert(err);
-          assert.equal(err.statusCode, 409);
-          done();
-        });
-      });
-    });
-    it('should be able to set a unique index', function(done) {
-      var beer = model(db, 'Beer'+Date.now());
-      var uniqueId = Date.now()
-      beer.setUniqueIndex('uniqueything', 'beer',
-        function(obj, cb) { cb(null, uniqueId) }, false);
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
-        assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
-        beer.save({name: 'Pacific Ale'}, function(err, ale) {
-          assert(!ale);
-          assert(err);
-          assert.equal(err.statusCode, 409);
-          done();
+          assert(!err);
+          assert(ale.id);
+          assert.equal(ale.name, 'Pacific Ale');
+          beer.save({name: 'Pacific Ale'}, function(err, ale) {
+            assert(!ale);
+            assert(err);
+            assert.equal(err.statusCode, 409);
+            done();
+          });
         });
       });
     });
