@@ -613,8 +613,11 @@ Saves or updates an object in the database. The steps for doing this are:
 1. `object` is prepared using [model.prepare](#prepare)
 2. `object` is validated using [model.validate](#validate). If validation
    fails, the callback is called immediately with an error.
-3. `object` is saved using [seraph.save](https://github.com/brikteknologier/seraph#node.save)
-4. `object` is indexed as this type of model using [seraph.index](https://github.com/brikteknologier/seraph#node.index)
+3. The `beforeSave` event is fired.
+4. A cypher query is assembled that will save/update the node with the appropriate
+   label, as well as any relevant composited nodes.
+5. `object` is saved.
+6. The `afterSave` event is fired.
 
 If `excludeCompositions` is truthy, any composed models attached to `object`
 will not be altered in the database (they will be ignored), and the object which 
@@ -654,8 +657,8 @@ Finds all of the objects that were saved with this type.
 
 This is a operationally similar to 
 [seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
-restricted to searching for other objects indexed as this kind of model. See the
-[quick example](#quick) for an example of this in action. 
+restricted to searching for nodes marked as this kind of model only. Will also
+return composited nodes. 
 
 <a name="prepare"/>
 #### `model.prepare(object, callback(err, preparedObject))`
@@ -681,53 +684,26 @@ automatically whitelisted. See
 examples.
 
 <a name="setUniqueKey"/>
-#### `model.setUniqueKey(keyName, [returnOldOnConflict = false])`
+#### `model.setUniqueKey(keyName, [returnOldOnConflict = false], [callback])`
 
-Sets the key to uniquely index this model on. Will also enforce that this key
-exists when you try to save a model.
+Adds a uniqueness constraint to the database that makes sure `keyName` has a
+unique value for any nodes labelled as this kind of model. If the constraint
+already exists, no changes are made.
 
 See the [using a unique key](#unique-key) section for more information and
 examples.
-
-<a name="setUniqueIndex"/>
-#### model.setUniqueIndex(indexName, key|keyResolver, value|valueResolver, [shouldIndex = undefined], [returnOldOnConflict = false])'
-
-Sets the index to use for enforcing uniqueness on this model.
-
-See the the [using a unique index](#unique-index) section for more information
-and examples, or the [indexes](#indexes) section for an explanation of the
-key/value resolvers and the `shouldIndex` argument.
 
 <a name="useTimestamps"/>
 #### `model.useTimestamps([createdField = 'created', [updatedField = 'updated'])`
 
 If called, the model will add a `created` and `updated` timestamp field to each
-model that is saved. These are unix timestamps based on the server's time. 
+model that is saved. These are timestamps based on the server's time (in ms). 
 
 You can also use the `model.touch(node, callback)` function to update the
 `updated` timestamp without changing any of the node's properties. This is useful
 if you're updating composed models seperately but still want the base model to
 be updated.
 
-##### Different timestamp formats
-
-By default, timestamps are a 
-[unix timestamp](https://en.wikipedia.org/wiki/Unix_time). You can change this
-by altering your model's `makeTimestamp` function. The function should return a
-value representing the current time.
-
-Seraph-model provides two of these functions for your convenience by default, 
-accessible on `model.timestampFactories`. They are:
-
-* `epochSeconds`: unix timestamp (default)
-* `epochMilliseconds`: unix offset (more accurate unix timestamp using ms)
-
-To use one of these, just assign it yourself like this:
-
-```javascript
-model.makeTimestamp = model.timestampFactories.epochMilliseconds;
-
-```
 <a name="addComputedField"/>
 #### `model.addComputedField(fieldName, computer)`
 
