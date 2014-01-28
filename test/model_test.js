@@ -192,7 +192,7 @@ describe('Seraph Model', function() {
         assert(!err);
         beer.read(meat.id, function(err, nothing) {
           assert(!nothing);
-          food.read(beer.id, function(err, nothing) {
+          food.read(heady.id, function(err, nothing) {
             assert(!nothing);
             done();
           });
@@ -238,7 +238,7 @@ describe('Seraph Model', function() {
         assert(!err);
         beer.exists(meat.id, function(err, exists) {
           assert(!exists);
-          food.read(beer.id, function(err, exists) {
+          food.read(heady.id, function(err, exists) {
             assert(!exists);
             done();
           });
