@@ -2,6 +2,8 @@ __seraph_model__ provides some convenient functions for storing and retrieving
 typed nodes from a neo4j database. It is intended to work with 
 [seraph](https://github.com/brikteknologier/seraph). 
 
+**using seraph-model < 0.6.0? please read [the changelist](#changelist)!**
+
 <a name="quick"/>
 ### Quick example
 
@@ -30,6 +32,10 @@ seraph-model 0.5.2 works with Neo4j-2.0.0-M05 and Neo4j-2.0.0-M06.
 
 To check if it works with your version, you should check out the repo, and
 change the Neo4j version at the start of the tests to the version you're running
+
+## Changelist
+
+Is [here](#changelist).
 
 # Documentation
 
@@ -842,3 +848,25 @@ db.find({type: 'IPA'}, false, beer.cypherStart(), function(err, beers) {
   // beers -> all beers with type == 'IPA'
 });
 ```
+
+<a name='#changelist'/>
+# Changelist
+
+## 0.6.0
+
+* Models now use [labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html) (new in neo4j 2) instead of legacy indexes to keep track of their type.
+* Removed all legacy indexing. Any legacy indexes you use should be now created
+  manually. The `afterSave` or `beforeSave` events are recommended for this
+  purpose.
+* `setUniqueKey` now uses neo4j 2.0.0 uniqueness constraints.
+* `cypherStart` becomes redundant.
+* `addUniqueKey` now has a callback, since it is now adding a uniqueness constraint
+  to the database.
+* Saving a model that has its uniqueness set to `returnOld` will now update the
+  existing node's properties on save, to the specified ones (old behaviour was
+  to discard the specified properties, make no changes, and return the existing node).
+* All timestamps are now in milliseconds, and can no longer be customised.
+* New option on `compose`: `updatesTimestamp` - allows the composed node to update
+  the `updated` timestamp of any nodes it is composed upon, when updating. This
+  functionality existed already, but was not optional. It is now opt-in.
+
