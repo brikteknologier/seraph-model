@@ -879,7 +879,7 @@ describe('Seraph Model', function() {
             assert(ale.updated > updated);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should not update the created timestamp upon saving', function(done) {
@@ -895,7 +895,7 @@ describe('Seraph Model', function() {
             assert(ale.created == created);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should not update the created timestamp upon saving with fields', function(done) {
@@ -912,7 +912,7 @@ describe('Seraph Model', function() {
             assert(ale.created == created);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should update updated when touched', function(done) {
@@ -927,7 +927,7 @@ describe('Seraph Model', function() {
             assert(ale.updated > updated);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should update root timestamp of composition when editing a detached child', function(done) {
@@ -952,9 +952,9 @@ describe('Seraph Model', function() {
                   assert(node.updated > updated);
                   done();
                 });
-              }, 100);
+              },100);
             });
-          }, 1000);
+          }, 50);
         });
     });
   });
