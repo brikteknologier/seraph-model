@@ -215,6 +215,10 @@ saving large graphs of different objects.
 **Composited objects will also be implicitly retrieved when reading from the
 database, to a specified depth.**.
 
+Because of this, you should be careful and sparing about what you compose. Compose
+only those models which you want to have *every time* you read an instance of this
+model.
+
 **example**
 
 ```javascript
@@ -344,7 +348,7 @@ beer.readComposition(pliny, 'hops', function(err, hops) {
 });
 ```
 <a name="uniqueness"/>
-## Setting a unique key or index 
+## Setting a unique key 
 
 In neo4j, you can enforce uniqueness of nodes by using a uniqueness constraint
 on a given key for a label. You can add this constraint yourself, but doing so
