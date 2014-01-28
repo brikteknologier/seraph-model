@@ -933,7 +933,9 @@ describe('Seraph Model', function() {
     it('should update root timestamp of composition when editing a detached child', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
-      food.compose(beer, 'matchingBeers', 'matches');
+      food.compose(beer, 'matchingBeers', 'matches', {
+        updatesTimestamp: true
+      });
       food.useTimestamps();
 
       food.save(
@@ -953,31 +955,6 @@ describe('Seraph Model', function() {
               }, 100);
             });
           }, 1000);
-        });
-    });
-    it('shouldn\'t re-update updated timestamp from saving with comps', function(done) {
-      var beer = model(db, 'Beer');
-      var food = model(db, 'Food');
-      food.compose(beer, 'matchingBeers', 'matches');
-      food.useTimestamps();
-
-      var cyphers = [];
-      var _qraw = db.queryRaw;
-      db.queryRaw = function(cypher) {
-        cyphers.push(cypher);
-        _qraw.apply(db, arguments);
-      };
-
-      food.save(
-        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} },
-        function(err, meal) {
-          assert(!err);
-          setTimeout(function() {
-            cyphers.forEach(function(cypher) {
-              if (cypher.match(/SET root\.updated/gi)) assert(false);
-            });
-            done();
-          }, 100);
         });
     });
   });
