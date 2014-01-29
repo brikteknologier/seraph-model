@@ -28,7 +28,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 
 ## Compatibility
 
-seraph-model 0.5.2 works with Neo4j-2.0.0-M05 and Neo4j-2.0.0-M06.
+seraph-model 0.6.0 works with Neo4j-2.0.0 and higher.
 
 To check if it works with your version, you should check out the repo, and
 change the Neo4j version at the start of the tests to the version you're running
