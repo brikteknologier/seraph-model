@@ -9,13 +9,11 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.0.0-RC1" }, function(err, _db, _neo) {
+    seraph({ version: "2.0.0" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
-      setTimeout(function() {
-        db.index.create('nodes', done);
-      }, 250);
+      done()
     });
   });
 
@@ -38,139 +36,6 @@ describe('Seraph Model', function() {
         assert(!ipa.id);
         done();
       })
-    });
-  });
-  describe('indexing', function() {
-    it ('should index a new object', function(done) {
-      var beer = model(db, 'Beer');
-
-      var ipa = {type: 'IPA', age: 25};
-
-      beer.save(ipa, function(err, ipa) {
-        assert(!err);
-        db.index.read('nodes', 'type', 'Beer', function(err, nodes) {
-          assert(!err);
-          assert(nodes);
-          if (!Array.isArray(nodes)) nodes = [nodes];
-
-          assert(!!_.find(nodes, function(node) {
-            return node.id == ipa.id;
-          }));
-
-          db.index.read('nodes', 'Beer', ipa.id, function(err, node) {
-            assert(!err);
-            assert(!!node);
-            assert.deepEqual(node, ipa);
-            done();
-          });
-        });
-      });
-    });
-    it ('should not index an old object', function(done) {
-      var beer = model(db, 'Beer');
-
-      var ipa = {type: 'IPA', age: 25};
-      beer.save(ipa, function(err, ipa) {
-        assert(!err);
-        db.index.remove('nodes', ipa.id, 'Beer', ipa.id, function(err) {
-          assert(!err, err);
-          beer.save(ipa, function(err) {
-            assert(!err);
-            db.index.read('nodes', 'Beer', ipa.id, function(err, node) {
-              assert(!err);
-              assert(!node);
-              done();
-            });
-          });
-        });
-      });
-    });
-    it ('should not throw an error if the nodes index doesn\'t exist', function(done) {
-      var beer = model(db, 'Beer');
-      var hop = model(db, 'Hop');
-      beer.compose(hop, 'hops', 'hoppedby');
-
-      beer.save({name:'Vildhjarta', hops:{name:'Centennial'}},function(e,b) {
-        db.node.index.delete('nodes', function(err) {
-          assert(!err);
-
-          beer.read(b, function(err, ipa) {
-            assert(!err);
-            done()
-          });
-        });
-      });
-    });
-    it ('should manually index an object', function(done) {
-      var beer = model(db, 'Beer');
-
-      var ipa = {type: 'IPA', age: 25};
-
-      db.save(ipa, function(err, ipa) {
-        assert(!err);
-        beer.index(ipa, function(err, ipa) {
-          assert(!err);
-          db.index.read('nodes', 'Beer', ipa.id, function(err, node) {
-            assert(!err);
-            assert(!!node);
-            assert.deepEqual(node,ipa);
-            done();
-          });
-        });
-      });
-    });
-    it ('should add to more than one index', function(done) {
-      var beer = model(db, 'Beer');
-
-      beer.addIndex('otherIndex', 'something', 'stuff');
-
-      var ipa = {type: 'IPA', age: 25};
-
-      beer.save(ipa, function(err, ipa) {
-        assert(!err);
-        db.index.read('otherIndex', 'something', 'stuff', function(err,nodes) {
-          assert(!err);
-          assert(nodes);
-          if (!Array.isArray(nodes)) nodes = [nodes];
-          assert(!!_.find(nodes, function(node) {
-            return node.id == ipa.id;
-          }));
-          done();
-        });
-      });
-    });
-    it('changing the name after construction should not break indexes', function(done) {
-      var beer = model(db);
-
-      beer.type = 'Beer';
-
-      beer.save({name:'Mega Amazing Ale'}, function(err, ale) {
-        assert(!err);
-        assert(ale.name == 'Mega Amazing Ale');
-        db.index.read('nodes', 'Beer', ale.id, function(err, indexedAle) {
-          assert(!err);
-          assert.deepEqual(indexedAle, ale);
-          done();
-        });
-      });
-    });
-    it('adding an index before changing name should not be destructive', function(done) {
-      var beer = model(db);
-
-      beer.addIndex('mega_index', 'omg', function(beer, cb) {
-        cb(null, beer.id);
-      });
-      beer.type = 'Beer';
-
-      beer.save({name:'Mega Amazing Ale'}, function(err, ale) {
-        assert(!err);
-        assert(ale.name == 'Mega Amazing Ale');
-        db.index.read('mega_index', 'omg', ale.id, function(err, indexedAle) {
-          assert(!err);
-          assert.deepEqual(indexedAle, ale);
-          done();
-        });
-      });
     });
   });
   describe('save events', function() {
@@ -214,25 +79,6 @@ describe('Seraph Model', function() {
 
       beer.on('validate', function(obj,cb) { validated = true, cb(); });
       beer.on('prepare', function(obj,cb) { prepared = true, cb(null, obj) });
-
-      beer.save({type:'IPA'}, function(err,obj) {
-        assert(evfired);
-        assert(!err);
-        done();
-      });
-    });
-    it('should fire the afterSever event after indexing', function(done) {
-      var beer = model(db, 'Beer');
-
-      var evfired = false;
-      var indexed = false;
-      beer.on('afterSave', function() {
-        evfired = indexed;
-      });
-
-      beer.addIndex('testthingy', 'stuff', function(obj,cb) {
-        indexed = true, cb(null, 'thing');
-      });
 
       beer.save({type:'IPA'}, function(err,obj) {
         assert(evfired);
@@ -346,7 +192,7 @@ describe('Seraph Model', function() {
         assert(!err);
         beer.read(meat.id, function(err, nothing) {
           assert(!nothing);
-          food.read(beer.id, function(err, nothing) {
+          food.read(heady.id, function(err, nothing) {
             assert(!nothing);
             done();
           });
@@ -392,7 +238,7 @@ describe('Seraph Model', function() {
         assert(!err);
         beer.exists(meat.id, function(err, exists) {
           assert(!exists);
-          food.read(beer.id, function(err, exists) {
+          food.read(heady.id, function(err, exists) {
             assert(!exists);
             done();
           });
@@ -402,7 +248,7 @@ describe('Seraph Model', function() {
 
   });
 
-  describe('Composition', function() {
+  describe('sm#Composition', function() {
     it('it should allow composing of models and save them properly', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -413,7 +259,7 @@ describe('Seraph Model', function() {
         {name:"Hovistuten"}
       ]}, function(err, meal) {
         assert(!err,err);
-        assert(meal.id)
+        assert(meal.id != null)
         assert(meal.matchingBeers[0].id);
         assert(meal.matchingBeers[1].id);
         db.relationships(meal, function(err, rels) {
@@ -620,14 +466,11 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-        db.index.read('nodes', 'Beer', meal.matchingBeers[0].id,
-        function(err, node) {
+        db.readLabels(meal.matchingBeers[0].id, function(err, labels) {
           assert(!err, err);
-          assert(node);
-          assert(node.id == meal.matchingBeers[0].id);
-          db.index.read('nodes', 'Food', meal.id, function(err, node) {
-            assert(node);
-            assert(node.id == meal.id);
+          assert.equal(labels[0], 'Beer');
+          db.readLabels(meal.id, function(err, labels) {
+            assert.equal(labels[0], 'Food');
             done();
           });
         });
@@ -665,7 +508,7 @@ describe('Seraph Model', function() {
         {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
       ]}, function(err, meal) {
         assert(!err);
-        food.read(meal, function(err, readMeal) {
+        food.read(meal, 4, function(err, readMeal) {
           assert(!err,err);
           assert.deepEqual(meal, readMeal);
           done();
@@ -711,7 +554,7 @@ describe('Seraph Model', function() {
           {name: 'El Dorado',aa:{percent:'10%'}}};
         food.save(meal, function(err, meal) {
           assert(!err);
-          food.read(meal, function(err, meal) {
+          food.read(meal, 3,  function(err, meal) {
             assert(meal.name == 'Pinnekjøtt');
             assert(meal.matchingBeers.name == 'Blekfjellet');
             assert(meal.matchingBeers.hops.name == 'El Dorado');
@@ -916,93 +759,80 @@ describe('Seraph Model', function() {
   describe('uniqueness', function() {
     it('should be able to set a unique key', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name', false);
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+      beer.setUniqueKey('name', false, function(err) {
         assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
         beer.save({name: 'Pacific Ale'}, function(err, ale) {
-          assert(!ale);
-          assert(err);
-          assert.equal(err.statusCode, 409);
-          done();
-        });
-      });
-    });
-    it('should be able to set a unique index', function(done) {
-      var beer = model(db, 'Beer'+Date.now());
-      var uniqueId = Date.now()
-      beer.setUniqueIndex('uniqueything', 'beer',
-        function(obj, cb) { cb(null, uniqueId) }, false);
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
-        assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
-        beer.save({name: 'Pacific Ale'}, function(err, ale) {
-          assert(!ale);
-          assert(err);
-          assert.equal(err.statusCode, 409);
-          done();
+          assert(!err);
+          assert(ale.id);
+          assert.equal(ale.name, 'Pacific Ale');
+          beer.save({name: 'Pacific Ale'}, function(err, ale) {
+            assert(!ale);
+            assert(err);
+            assert.equal(err.statusCode, 409);
+            done();
+          });
         });
       });
     });
     it('should be able to set a unique key and use return-old mode', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name', true);
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
+      beer.setUniqueKey('name', true, function(err) {
         assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
-        beer.save({name: 'Pacific Ale', otherThing: 1}, function(err, ale2) {
+        beer.save({name: 'Pacific Ale'}, function(err, ale) {
           assert(!err);
-          assert.deepEqual(ale, ale2);
-          assert.ok(!ale2.otherThing);
-          beer.read(ale.id, function(err, ale3) {
+          assert(ale.id);
+          assert.equal(ale.name, 'Pacific Ale');
+          beer.save({name: 'Pacific Ale', otherThing: 1}, function(err, ale2) {
             assert(!err);
-            assert(!ale3.otherThing);
-            assert.deepEqual(ale, ale3);
-            done();
+            assert.equal(ale2.otherThing, 1);
+            beer.read(ale.id, function(err, ale3) {
+              assert(!err);
+              assert.equal(ale3.otherThing, 1);
+              assert.deepEqual(ale2, ale3);
+              done();
+            });
           });
         });
       });
     });
     it('should enforce uniqueness on composed models', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name', false);
-      var food = model(db, 'Food');
-      food.compose(beer, 'matchingBeers', 'matches');
-      food.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}},
-      function(err, meal) {
-        assert(!err);
-        assert(meal.id);
-        assert.equal(meal.name, 'Burrito');
-        meal.matchingBeers = {name: 'Pacific Ale'};
-        food.save(meal, function(err, meal) {
-          assert(!meal);
-          assert(err);
-          // pending neo4j issue #906
-          //assert.equal(err.statusCode, 409);
-          done();
+      beer.setUniqueKey('name', false, function(err) {
+        var food = model(db, 'Food');
+        food.compose(beer, 'matchingBeers', 'matches');
+        food.save({name: 'Burrito', matchingBeers: {name: 'Pacific Ale'}},
+        function(err, meal) {
+          assert(!err);
+          assert(meal.id);
+          assert.equal(meal.name, 'Burrito');
+          meal.matchingBeers = {name: 'Pacific Ale'};
+          food.save(meal, function(err, meal) {
+            assert(!meal);
+            assert(err);
+            assert.equal(err.statusCode, 409);
+            done();
+          });
         });
       });
     });
     it('should support updating', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.setUniqueKey('name');
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
-        assert(!err);
-        assert(ale.id);
-        assert.equal(ale.name, 'Pacific Ale');
-        ale.otherThing = 1;
-        beer.save(ale, function(err, ale2) {
+      beer.setUniqueKey('name', function(err) {
+        beer.save({name: 'Pacific Ale'}, function(err, ale) {
           assert(!err);
-          assert.deepEqual(ale, ale2);
-          assert.ok(ale2.otherThing);
-          beer.read(ale.id, function(err, ale3) {
+          assert(ale.id);
+          assert.equal(ale.name, 'Pacific Ale');
+          ale.otherThing = 1;
+          beer.save(ale, function(err, ale2) {
             assert(!err);
-            assert(ale3.otherThing);
-            assert.deepEqual(ale, ale3);
-            done();
+            assert.deepEqual(ale, ale2);
+            assert.ok(ale2.otherThing);
+            beer.read(ale.id, function(err, ale3) {
+              assert(!err);
+              assert(ale3.otherThing);
+              assert.deepEqual(ale, ale3);
+              done();
+            });
           });
         });
       });
@@ -1012,21 +842,6 @@ describe('Seraph Model', function() {
   describe('Timestamps', function() {
     it('should add timestamps', function(done) {
       var beer = model(db, 'Beer'+Date.now());
-      beer.useTimestamps();
-      beer.save({name: 'Pacific Ale'}, function(err, ale) {
-        assert(!err);
-        assert(ale.created);
-        assert(typeof ale.created == 'number');
-        assert(ale.created <= require('moment')().unix());
-        assert(ale.updated);
-        assert(typeof ale.updated == 'number');
-        assert(ale.updated <= require('moment')().unix());
-        done();
-      });
-    });
-    it('should add timestamps in ms', function(done) {
-      var beer = model(db, 'Beer'+Date.now());
-      beer.makeTimestamp = beer.timestampFactories.epochMilliseconds;
       beer.useTimestamps();
       beer.save({name: 'Pacific Ale'}, function(err, ale) {
         assert(!err);
@@ -1064,7 +879,7 @@ describe('Seraph Model', function() {
             assert(ale.updated > updated);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should not update the created timestamp upon saving', function(done) {
@@ -1080,7 +895,7 @@ describe('Seraph Model', function() {
             assert(ale.created == created);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should not update the created timestamp upon saving with fields', function(done) {
@@ -1097,7 +912,7 @@ describe('Seraph Model', function() {
             assert(ale.created == created);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should update updated when touched', function(done) {
@@ -1112,13 +927,15 @@ describe('Seraph Model', function() {
             assert(ale.updated > updated);
             done()
           });
-        }, 1000);
+        }, 50);
       });
     });
     it('should update root timestamp of composition when editing a detached child', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
-      food.compose(beer, 'matchingBeers', 'matches');
+      food.compose(beer, 'matchingBeers', 'matches', {
+        updatesTimestamp: true
+      });
       food.useTimestamps();
 
       food.save(
@@ -1135,34 +952,9 @@ describe('Seraph Model', function() {
                   assert(node.updated > updated);
                   done();
                 });
-              }, 100);
+              },100);
             });
-          }, 1000);
-        });
-    });
-    it('shouldn\'t re-update updated timestamp from saving with comps', function(done) {
-      var beer = model(db, 'Beer');
-      var food = model(db, 'Food');
-      food.compose(beer, 'matchingBeers', 'matches');
-      food.useTimestamps();
-
-      var cyphers = [];
-      var _qraw = db.queryRaw;
-      db.queryRaw = function(cypher) {
-        cyphers.push(cypher);
-        _qraw.apply(db, arguments);
-      };
-
-      food.save(
-        {name:"Pinnekjøtt", matchingBeers: {name:"Heady Topper"} },
-        function(err, meal) {
-          assert(!err);
-          setTimeout(function() {
-            cyphers.forEach(function(cypher) {
-              if (cypher.match(/SET root\.updated/gi)) assert(false);
-            });
-            done();
-          }, 100);
+          }, 50);
         });
     });
   });

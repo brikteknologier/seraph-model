@@ -2,6 +2,8 @@ __seraph_model__ provides some convenient functions for storing and retrieving
 typed nodes from a neo4j database. It is intended to work with 
 [seraph](https://github.com/brikteknologier/seraph). 
 
+**using seraph-model < 0.6.0? please read [the changelist](#thechangelist)!**
+
 <a name="quick"/>
 ### Quick example
 
@@ -26,10 +28,14 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 
 ## Compatibility
 
-seraph-model 0.5.2 works with Neo4j-2.0.0-M05 and Neo4j-2.0.0-M06.
+seraph-model 0.6.0 works with Neo4j-2.0.0 and higher.
 
 To check if it works with your version, you should check out the repo, and
 change the Neo4j version at the start of the tests to the version you're running
+
+## Changelist
+
+Is [here](#thechangelist).
 
 # Documentation
 
@@ -38,11 +44,10 @@ change the Neo4j version at the start of the tests to the version you're running
 * [Creating a new Model](#create)
 * [Adding preparers](#preparation)
 * [Adding validators](#validation)
-* [Adding indexes](#indexes)
 * [beforeSave/afterSave events](#saveevents)
 * [Setting a properties whitelist](#settingfields)
 * [Composition of models](#composition)
-* [Setting a unique key or index](#uniqueness)
+* [Setting a unique key](#uniqueness)
 * [Computed fields](#computed-fields)
 * [Schemas](#schemas)
 
@@ -58,7 +63,6 @@ change the Neo4j version at the start of the tests to the version you're running
 * [model.validate](#validate)
 * [model.fields](#fields)
 * [model.setUniqueKey](#setUniqueKey)
-* [model.setUniqueIndex](#setUniqueIndex)
 * [model.useTimestamps](#useTimestamps)
 * [model.addComputedField](#addComputeField)
 * [model.cypherStart](#cypherStart)
@@ -73,12 +77,7 @@ You can create a new model by calling the function returned by requiring
 passed to the model itself in order to perform work on it. Much like seraph
 itself.
 
-It works by indexing each object under a `nodes` index. Each different model is
-simply an item in that index, with all of the instances of that model attached
-to it.
-
-Each model is also indexed by its id upon saving the first time. This ensures
-that when reading models, you do not read models of other types.
+It works by labelling each object with a `type` that you specify.
 
 ### Example
 ```javascript
@@ -89,6 +88,9 @@ Beer.save({name: 'Pacific Ale', brewery: 'Stone & Wood'}, function(err, beer) {
   // saved!
 });
 ```
+
+After running this, your node is saved, and labelled as a `beer`, so a cypher
+query like `MATCH node:beer RETURN node` would return your node.
 
 <a name="preparation"/>
 ## Adding preparers
@@ -162,61 +164,13 @@ model.save({ name: 'Jordan', age: 17 }, function(err, person) {
 });
 ```
 
-<a name="indexes"/>
-## Adding indexes
-
-### `addIndex(indexName, key, value[, shouldIndex])`
-
-You can add any number of indexes to add an object to upon saving by using the
-`addIndex` function. Objects are
-only indexed the first time they are saved, but you can manually index an object
-by calling the `index` function. 
-
-They keys and values passed to `addIndex` can be computed, but that is optional.
-If they are computed, you must pass the resultant key or value to a callback,
-rather than returning it (this gives you the opportunity to do asynchronous
-calculations at this point).
-
-You also have the option of passing a function to determine weather or not
-the index is used at all.
-
-### Example 
-
-With static keys/values
-
-```javascript
-model.addIndex('wobblebangs', 'bangs', 'wobbly');
-```
-
-With computed value
-```javascript
-model.addIndex('uniquely_identified_stuff', 'stuff', function(obj, cb) {
-  cb(null, createUuid());
-});
-```
-
-With computed key and value
-```javascript
-model.addIndex('things',
-  function(obj, cb) { cb(null, obj.model); },
-  function(obj, cb) { cb(null, obj.id); });
-```
-
-With conditional indexing
-```javascript
-model.addIndex('some_stuff', 'things', 'cool', function(obj, cb) {
-  var isCoolEnough = obj.temperature < 20;
-  cb(null, isCoolEnough); //objs with `temperature` >= 20 are not indexed
-});
-```
-
 <a name="saveevents"/>
 ## Save events
 
 There's a few events you can listen on:
 
 * `beforeSave` fired after preparation and validation, but before saving.
-* `afterSave` fired after saving and indexing. 
+* `afterSave` fired after saving. 
 
 ### Example
 
@@ -253,15 +207,17 @@ beer.save({
 
 Composition allows you to relate two models so that you can save nested objects
 faster, and atomically. When two models are composed, even though you might be
-saving 10 objects, only 2 api calls (saving & indexing) will be made, just as if 
-you were only saving 1. 
+saving 10 objects, only 1 api call will be made.
 
 With this, you can also nest objects, which can make your life a bit easier when
-saving large objects.
+saving large graphs of different objects.
 
 **Composited objects will also be implicitly retrieved when reading from the
-database, to infinite depth.** The number of read API calls is variable, and will
-expand depending on the level and complexity of your compositions.
+database, to a specified depth.**.
+
+Because of this, you should be careful and sparing about what you compose. Compose
+only those models which you want to have *every time* you read an instance of this
+model.
 
 **example**
 
@@ -368,6 +324,9 @@ Add a composition.
   (ascending), or an object with the name of the property value and the order
   direction. Possible values might include: `'age'`, 
   `{property: 'age', desc: true}`, `{property: 'age', desc: false}`.
+* `updatesTimestamp`: (default = `false`) - if true, whenever a composed model is
+  saved, it will update the `updated` timestamp of the root model. Does nothing
+  if `this` is not using timestamps.
 
 ### model.readComposition(objectOrId, compositionKey, callback)
 
@@ -389,36 +348,17 @@ beer.readComposition(pliny, 'hops', function(err, hops) {
 });
 ```
 <a name="uniqueness"/>
-## Setting a unique key or index 
+## Setting a unique key 
 
-In neo4j, you can enforce uniqueness of nodes by associating them with an index.
-There's two ways of doing this with seraph-model: by specifying a key in the
-model to index upon, or by specifying the index yourself. See the examples below
-for specifying a unique index for a node.
-
-**Note** that there is one in particular "gotcha" with enforced uniqueness on 
-composed models: in the event that you try to add a new object and there is
-already an object indexed the same way, an error will be thrown. Unfortunately,
-due to [a bug](https://github.com/neo4j/neo4j/issues/906) with neo4j's batch
-API, and the fact that composed models always save in a batch, this means that
-a statusCode of 500 will be returned. There is in fact no good way to determine
-that such an error is, in fact, the result of a conflict, yet. 
+In neo4j, you can enforce uniqueness of nodes by using a uniqueness constraint
+on a given key for a label. You can add this constraint yourself, but doing so
+through seraph-model will give you the option to use the existing node in the event of a 
+conflict. 
 
 ### Unique Key
 
-Specifying a unique key will automatically index your node under a new index,
-using that key in each saved model. The index is named after your model's `type`
-property. For example, a model with `model.type = 'car'` will be added under
-the index `cars`. The index name is automatically pluralized from the model type
-name. 
-
-If you specified the key as `model`, then each time an object is saved it is
-indexed (in this example) in the `cars` index, under the key `model`, with the
-value of whatever `model` was set to.
-
-Setting a unique key also automatically adds a validator checking that the
-indexed key was set on every object that is saved. An object will not be able to
-save without that key being set.
+Specifiying a unique key will create a constraint on that key. This means that
+no two nodes saved as this kind of model can have the same value for that key.
 
 For example:
 
@@ -427,7 +367,6 @@ var Car = model(db, 'car');
 Car.setUniqueKey('model');
 Car.save({make: 'Citroën', model: 'DS4'}, function(err, ds4) {
   // ds4 -> { id: 1, make: 'Citroën', model: 'DS4' }
-  // node 1 is now indexed in neo4j under `cars(model="DS4")`
   Car.save({make: 'Toyota', model: 'DS4'}, function(err, otherDs4) {
     // err.statusCode -> 409 (conflict)
   });
@@ -444,7 +383,7 @@ index. For example:
 
 ```javascript
 var Tag = model(db, 'tag');
-Tag.setUniqueKey('tag');
+Tag.setUniqueKey('tag', true);
 Tag.save({tag: 'finnish'}, function(err, tag) {
   // tag -> { id: 1, tag: 'finnish' }
   
@@ -452,31 +391,6 @@ Tag.save({tag: 'finnish'}, function(err, tag) {
   Tag.save({tag: 'finnish'}, function(err, tag) {
     // instead of saving another tag 'finnish', the first one was returned
     // tag -> { id: 1, tag: 'finnish' }
-  });
-});
-```
-
-### Unique Index
-
-In case you want your unique index to be a little more involved than just using
-a value from the model, you can define your own unique index. The function you 
-use to do this is [model.setUniqueIndex](#setUniqueIndex), and it takes similar
-arguments to [model.addIndex](#indexes).
-
-Here's an example with the Car model shown above, which uses both the `make` and
-the `model` to uniquely index.
-
-```javascript
-var Car = model(db, 'car');
-Car.setUniqueIndex('cars', 'make_and_model', function(car, cb) {
-  if (!car.make || !car.model) cb("A car should have both a make and a model!");
-  else cb(null, car.make + ' ' + car.model);
-});
-
-Car.save({make: 'Citroën', model: 'DS4'}, function(err, ds4) {
-  db.index.read('cars', 'make_and_model', 'Citroën DS4', function(err, car) { 
-    // `ds4` was indexed under 'Citroën DS4'.
-    assert.deepEqual(ds4, car);
   });
 });
 ```
@@ -703,8 +617,11 @@ Saves or updates an object in the database. The steps for doing this are:
 1. `object` is prepared using [model.prepare](#prepare)
 2. `object` is validated using [model.validate](#validate). If validation
    fails, the callback is called immediately with an error.
-3. `object` is saved using [seraph.save](https://github.com/brikteknologier/seraph#node.save)
-4. `object` is indexed as this type of model using [seraph.index](https://github.com/brikteknologier/seraph#node.index)
+3. The `beforeSave` event is fired.
+4. A cypher query is assembled that will save/update the node with the appropriate
+   label, as well as any relevant composited nodes.
+5. `object` is saved.
+6. The `afterSave` event is fired.
 
 If `excludeCompositions` is truthy, any composed models attached to `object`
 will not be altered in the database (they will be ignored), and the object which 
@@ -744,8 +661,8 @@ Finds all of the objects that were saved with this type.
 
 This is a operationally similar to 
 [seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
-restricted to searching for other objects indexed as this kind of model. See the
-[quick example](#quick) for an example of this in action. 
+restricted to searching for nodes marked as this kind of model only. Will also
+return composited nodes. 
 
 <a name="prepare"/>
 #### `model.prepare(object, callback(err, preparedObject))`
@@ -771,74 +688,84 @@ automatically whitelisted. See
 examples.
 
 <a name="setUniqueKey"/>
-#### `model.setUniqueKey(keyName, [returnOldOnConflict = false])`
+#### `model.setUniqueKey(keyName, [returnOldOnConflict = false], [callback])`
 
-Sets the key to uniquely index this model on. Will also enforce that this key
-exists when you try to save a model.
+Adds a uniqueness constraint to the database that makes sure `keyName` has a
+unique value for any nodes labelled as this kind of model. If the constraint
+already exists, no changes are made.
 
 See the [using a unique key](#unique-key) section for more information and
 examples.
-
-<a name="setUniqueIndex"/>
-#### model.setUniqueIndex(indexName, key|keyResolver, value|valueResolver, [shouldIndex = undefined], [returnOldOnConflict = false])'
-
-Sets the index to use for enforcing uniqueness on this model.
-
-See the the [using a unique index](#unique-index) section for more information
-and examples, or the [indexes](#indexes) section for an explanation of the
-key/value resolvers and the `shouldIndex` argument.
 
 <a name="useTimestamps"/>
 #### `model.useTimestamps([createdField = 'created', [updatedField = 'updated'])`
 
 If called, the model will add a `created` and `updated` timestamp field to each
-model that is saved. These are unix timestamps based on the server's time. 
+model that is saved. These are timestamps based on the server's time (in ms). 
 
 You can also use the `model.touch(node, callback)` function to update the
 `updated` timestamp without changing any of the node's properties. This is useful
 if you're updating composed models seperately but still want the base model to
 be updated.
 
-##### Different timestamp formats
-
-By default, timestamps are a 
-[unix timestamp](https://en.wikipedia.org/wiki/Unix_time). You can change this
-by altering your model's `makeTimestamp` function. The function should return a
-value representing the current time.
-
-Seraph-model provides two of these functions for your convenience by default, 
-accessible on `model.timestampFactories`. They are:
-
-* `epochSeconds`: unix timestamp (default)
-* `epochMilliseconds`: unix offset (more accurate unix timestamp using ms)
-
-To use one of these, just assign it yourself like this:
-
-```javascript
-model.makeTimestamp = model.timestampFactories.epochMilliseconds;
-
-```
 <a name="addComputedField"/>
 #### `model.addComputedField(fieldName, computer)`
 
 Add a [computed field](#computed-fields) to a model.
 
-<a name="cypherStart"/>
-#### `model.cypherStart()`
+<a name='thechangelist'/>
+# Changelist
 
-Returns the appropriate START point for a cypher query for this kind of model.
-Example:
+## 0.6.0
 
-```javascript
-var beer = model(db, 'Beer');
+See [migration guide](#migration) for details on migrating from 0.5.0 to 0.6.0.
+If you've been using 0.5.0 this is mandatory, your models won't work if you don't
+migrate.
 
-beer.cypherStart(); // -> 'node:nodes(type = "Beer")'
+* Models now use [labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html) (new in neo4j 2) instead of legacy indexes to keep track of their type.
+* Removed all legacy indexing. Any legacy indexes you use should be now created
+  manually. The `afterSave` or `beforeSave` events are recommended for this
+  purpose.
+* `setUniqueKey` now uses neo4j 2.0.0 uniqueness constraints.
+* `cypherStart` becomes redundant.
+* `addUniqueKey` now has a callback, since it is now adding a uniqueness constraint
+  to the database.
+* Saving a model that has its uniqueness set to `returnOld` will now update the
+  existing node's properties on save, to the specified ones (old behaviour was
+  to discard the specified properties, make no changes, and return the existing node).
+* All timestamps are now in milliseconds, and can no longer be customised.
+* New option on `compose`: `updatesTimestamp` - allows the composed node to update
+  the `updated` timestamp of any nodes it is composed upon, when updating. This
+  functionality existed already, but was not optional. It is now opt-in.
+* Both read and write now use only a single API call.
+
+<a name='migration'/>
+# Migration Guide
+
+## to 0.6.0
+
+This will remove the `nodes` legacy index that was used to keep track of seraph-models
+pre 0.6.0. It will label all of the nodes that were in that index with the type of
+the model. If you specify, it will also migrate your created/updated timestamps.
+You will need to write your own script to use it.
+
+You can include the migration function like so:
+
+```
+var migrate = require('seraph-model/migrations/0.5.*-to-0.6.*');
 ```
 
-You can then use this in a seraph `find` or `query` call. Example:
+This function has the following signature:
 
-```javascript
-db.find({type: 'IPA'}, false, beer.cypherStart(), function(err, beers) {
-  // beers -> all beers with type == 'IPA'
-});
 ```
+migrate(db, models, [migrateTimestamps,] [migrateTimestampsFn,] callback)
+```
+
+* `db` - an instance of seraph pointing to your neo4j db that you want to migrate
+* `models` - an array of your seraph-models that you would like to migrate.
+* `migrateTimestamps` - whether or not this migration should attempt to update your
+  timestamps to the new millisecond-only format
+* `migrateTimestampsFn` - a function to take a timestamp of your old format, and
+  conver it to milliseconds since 1970/01/01. defaults to `function(ts) { return ts * 1000 }`.
+* `callback` - function to call when the migration is complete.
+
