@@ -1,6 +1,6 @@
 {
   "name": "seraph-model",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "thin model layer for seraph/neo4j",
   "main": "lib/model.js",
   "scripts": {
@@ -14,9 +14,6 @@
     "inflection": "~1.2.6",
     "augur": "~1.0.2",
     "moment": "~2.0.0"
-  },
-  "peerDependencies": {
-    "seraph": "~0.9.0"
   },
   "devDependencies": {
     "mocha": "*",
