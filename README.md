@@ -713,7 +713,7 @@ be updated.
 
 Add a [computed field](#computed-fields) to a model.
 
-<a name='#thechangelist'/>
+<a name='thechangelist'/>
 # Changelist
 
 ## 0.6.0
@@ -739,7 +739,7 @@ migrate.
   functionality existed already, but was not optional. It is now opt-in.
 * Both read and write now use only a single API call.
 
-<a name='#migration'/>
+<a name='migration'/>
 # Migration Guide
 
 ## to 0.6.0
