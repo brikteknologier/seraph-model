@@ -2,7 +2,7 @@ __seraph_model__ provides some convenient functions for storing and retrieving
 typed nodes from a neo4j database. It is intended to work with 
 [seraph](https://github.com/brikteknologier/seraph). 
 
-**using seraph-model < 0.6.0? please read [the changelist](#changelist)!**
+**using seraph-model < 0.6.0? please read [the changelist](#thechangelist)!**
 
 <a name="quick"/>
 ### Quick example
