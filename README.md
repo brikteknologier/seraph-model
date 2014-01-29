@@ -35,7 +35,7 @@ change the Neo4j version at the start of the tests to the version you're running
 
 ## Changelist
 
-Is [here](#changelist).
+Is [here](#thechangelist).
 
 # Documentation
 
@@ -713,7 +713,7 @@ be updated.
 
 Add a [computed field](#computed-fields) to a model.
 
-<a name='#changelist'/>
+<a name='#thechangelist'/>
 # Changelist
 
 ## 0.6.0
