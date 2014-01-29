@@ -718,6 +718,10 @@ Add a [computed field](#computed-fields) to a model.
 
 ## 0.6.0
 
+See [migration guide](#migration) for details on migrating from 0.5.0 to 0.6.0.
+If you've been using 0.5.0 this is mandatory, your models won't work if you don't
+migrate.
+
 * Models now use [labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html) (new in neo4j 2) instead of legacy indexes to keep track of their type.
 * Removed all legacy indexing. Any legacy indexes you use should be now created
   manually. The `afterSave` or `beforeSave` events are recommended for this
@@ -734,4 +738,34 @@ Add a [computed field](#computed-fields) to a model.
   the `updated` timestamp of any nodes it is composed upon, when updating. This
   functionality existed already, but was not optional. It is now opt-in.
 * Both read and write now use only a single API call.
+
+<a name='#migration'/>
+# Migration Guide
+
+## to 0.6.0
+
+This will remove the `nodes` legacy index that was used to keep track of seraph-models
+pre 0.6.0. It will label all of the nodes that were in that index with the type of
+the model. If you specify, it will also migrate your created/updated timestamps.
+You will need to write your own script to use it.
+
+You can include the migration function like so:
+
+```
+var migrate = require('seraph-model/migrations/0.5.*-to-0.6.*');
+```
+
+This function has the following signature:
+
+```
+migrate(db, models, [migrateTimestamps,] [migrateTimestampsFn,] callback)
+```
+
+* `db` - an instance of seraph pointing to your neo4j db that you want to migrate
+* `models` - an array of your seraph-models that you would like to migrate.
+* `migrateTimestamps` - whether or not this migration should attempt to update your
+  timestamps to the new millisecond-only format
+* `migrateTimestampsFn` - a function to take a timestamp of your old format, and
+  conver it to milliseconds since 1970/01/01. defaults to `function(ts) { return ts * 1000 }`.
+* `callback` - function to call when the migration is complete.
 
