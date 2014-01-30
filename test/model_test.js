@@ -1,5 +1,6 @@
 var assert = require('assert');
 var model = require('../');
+var async = require('async');
 var Emitter = require('events').EventEmitter;
 var util = require('util');
 var seraph = require('disposable-seraph');
@@ -226,7 +227,7 @@ describe('Seraph Model', function() {
       assert(!err);
       beer.save({name:"Galaxy IPA"}, function(err, galaxy) {
         assert(!err);
-        beer.query("match (beer:Beer) where id(beer) in {ids} with beer, {test: true} as stuff", { ids: [heady.id, galaxy.id] }, {varName: 'beer', otherVars: ['beer']}, function(err, results) {
+        beer.query("match (beer:Beer) where id(beer) in {ids} with beer, {test: true} as stuff", { ids: [heady.id, galaxy.id] }, {varName: 'beer', otherVars: ['stuff']}, function(err, results) {
           assert(!err);
           assert(results.length == 2);
           assert(results[0].stuff.test == true);
@@ -234,40 +235,27 @@ describe('Seraph Model', function() {
           done();
         });
       })
+    });
   });
 
   it('querying should allow manual filters', function(done) {
     var beer = model(db, 'Beer' + Date.now());
 
-    async.forEach(_.range[0,25], function(num, callback) {
+    async.forEach(_.range(0,25), function(num, callback) {
       beer.save({name:'amazing duplicate beer',sn:Math.ceil(Math.random() * 100000)}, callback);
     }, function(err) {
-      beer.query("match (beer:" + beer.type + ")", {
+      beer.query("match (beer:" + beer.type + ")",{}, {
         varName: "beer",
         filter: "ORDER BY beer.sn DESC"
       }, function(err, nodes) {
         assert(!err);
         assert(nodes.length == 25);
         for (var i = 0; i + 1 < nodes.length; ++i) {
-          assert(nodes[i].sn > nodes[i + i].sn);
+          assert(nodes[i].sn > nodes[i + 1].sn);
         }
         done();
       });
     });
-
-
-    beer.save({name:"Heady Topper"}, function(err, heady) {
-      assert(!err);
-      beer.save({name:"Galaxy IPA"}, function(err, galaxy) {
-        assert(!err);
-        beer.query("match (beer:Beer) where id(beer) in {ids} with beer, {test: true} as stuff", { ids: [heady.id, galaxy.id] }, {varName: 'beer', otherVars: ['beer']}, function(err, results) {
-          assert(!err);
-          assert(results.length == 2);
-          assert(results[0].stuff.test == true);
-          assert(results[1].stuff.test == true);
-          done();
-        });
-      })
   });
 
   it('should save a model with a string id', function(done) {
