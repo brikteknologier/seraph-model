@@ -227,7 +227,9 @@ describe('Seraph Model', function() {
       assert(!err);
       beer.save({name:"Galaxy IPA"}, function(err, galaxy) {
         assert(!err);
-        beer.query("match (beer:Beer) where id(beer) in {ids} with beer, {test: true} as stuff", { ids: [heady.id, galaxy.id] }, {varName: 'beer', otherVars: ['stuff']}, function(err, results) {
+        beer.query("match (beer:Beer) where id(beer) in {ids} with beer, {test: true} as stuff", 
+          { ids: [heady.id, galaxy.id] }, {varName: 'beer', otherVars: ['stuff']}, 
+          function(err, results) {
           assert(!err);
           assert(results.length == 2);
           assert(results[0].stuff.test == true);
@@ -246,10 +248,12 @@ describe('Seraph Model', function() {
     }, function(err) {
       beer.query("match (beer:" + beer.type + ")",{}, {
         varName: "beer",
-        filter: "ORDER BY beer.sn DESC"
+        skip: 5,
+        limit: 15,
+        orderBy: 'beer.sn DESC'
       }, function(err, nodes) {
         assert(!err);
-        assert(nodes.length == 25);
+        assert(nodes.length == 15);
         for (var i = 0; i + 1 < nodes.length; ++i) {
           assert(nodes[i].sn > nodes[i + 1].sn);
         }
