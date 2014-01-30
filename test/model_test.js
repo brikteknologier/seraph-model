@@ -183,7 +183,6 @@ describe('Seraph Model', function() {
     });
   });
   it('reading should only read the relevant model', function(done) {
-
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
 
@@ -202,6 +201,26 @@ describe('Seraph Model', function() {
     });
 
   });
+
+  it('querying should only read the relevant model', function(done) {
+    var beer = model(db, 'Beer');
+    var food = model(db, 'Food');
+
+    beer.save({name:"Heady Topper"}, function(err, heady) {
+      assert(!err);
+      food.save({name:"Pinnekjøtt"}, function(err, meat) {
+        assert(!err);
+        beer.query("start node({id})", { id: meat.id }, function(err, results) {
+          assert(!err);
+          assert(Array.isArray(results));
+          assert(results.length == 0);
+          done();
+        });
+      })
+    });
+
+  });
+
   it('should save a model with a string id', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
