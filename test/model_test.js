@@ -183,6 +183,7 @@ describe('Seraph Model', function() {
     });
   });
   it('reading should only read the relevant model', function(done) {
+
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
 
@@ -753,6 +754,24 @@ describe('Seraph Model', function() {
         assert.strictEqual(fud, false);
         done();
       });
+    });
+
+    it ('should allow custom queries and add compositions', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+
+      food.save(
+        {name:"Pinnekjøtt", matchingBeers: [{name:"Heady Topper"}] },
+        function(err, meal) {
+          assert(!err);
+          food.query("MATCH (node:Food) WHERE id(node) = {id}", { id: meal.id }, 'node', function(err, results) {
+            assert(!err);
+            assert(Array.isArray(results));
+            assert.deepEqual(results[0], meal);
+            done();
+          });
+        });
     });
   });
 
