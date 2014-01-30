@@ -679,8 +679,12 @@ all Cars with an age greater than `x` years. I might do a query like this:
 
 * `varName` (default = `node`) - the variable name in the query referring to
   nodes of the current model.
-* `filter` - a portion of the query to apply after the return statement - such
-  as `ORDER BY`, `SKIP`, and `LIMIT`.
+* `skip` (default = 0) - skip this many nodes in the resultset (exactly the same
+  as cypher's SKIP)
+* `limit` (default = none) - limit to this many results (exactly the same as
+  cypher's LIMIT)
+* `orderBy` - an order by clause. to order by a property, use `varName` as well.
+  For example, if `varName` is `beer`, I can have a `orderBy` value of `beer.abv DESC`.
 * `otherVars` - an array of other variable names that you want to return. they 
   will be attached to each node in the result. for example if you have a variable
   in your query `age`, and you specify it in `otherVars`, its value will be returned
