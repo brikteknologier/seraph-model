@@ -252,6 +252,7 @@ describe('Seraph Model', function() {
         limit: 15,
         orderBy: 'beer.sn DESC'
       }, function(err, nodes) {
+        console.log(err);
         assert(!err);
         assert(nodes.length == 15);
         for (var i = 0; i + 1 < nodes.length; ++i) {
