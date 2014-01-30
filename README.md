@@ -666,17 +666,29 @@ restricted to searching for nodes marked as this kind of model only. Will also
 return composited nodes. 
 
 <a name="query"/>
-#### `model.query(query, params, varName, callback)`
+#### `model.query(query, params, opts, callback)`
 
 Takes a partial cypher query and extends it to retrieve seraph-models of this 
 type. This is useful if you have computed properties or compositions. The `query`
 should be a regular cypher query, but it should not have a RETURN statement. It
-should also have a `node` variable (name is configurable via the `varName`
-argument) that represents the model. So for example, lets say I want to find
+should also have a `node` variable (name is configurable via the `opts.varName`
+setting) that represents the model. So for example, lets say I want to find
 all Cars with an age greater than `x` years. I might do a query like this:
 
+**Available options**
+
+* `varName` (default = `node`) - the variable name in the query referring to
+  nodes of the current model.
+* `filter` - a portion of the query to apply after the return statement - such
+  as `ORDER BY`, `SKIP`, and `LIMIT`.
+* `otherVars` - an array of other variable names that you want to return. they 
+  will be attached to each node in the result. for example if you have a variable
+  in your query `age`, and you specify it in `otherVars`, its value will be returned
+  on each return model as the `age` property. Note that if a property with that
+  name already exists, it will be overwritten (on the client, not in the database)
+
 ```javascript
-Car.query('MATCH (car:car) WHERE car.age > {x}', { x: 10 }, 'car', function(err, cars) {
+Car.query('MATCH (car:car) WHERE car.age > {x}', { x: 10 }, { varName: 'car' }, function(err, cars) {
   // `cars` is always an array
 });
 ```
