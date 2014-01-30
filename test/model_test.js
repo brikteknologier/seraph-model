@@ -795,6 +795,21 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('should support multiple composited nodes it return-old mode', function(done) {
+      var beer = model(db, 'Beer');
+      var tag = model(db, 'Tag' + Date.now());
+      beer.compose(tag, 'tags', 'tagged');
+      tag.setUniqueKey('tag', true, function(err) {
+        assert(!err);
+        beer.save({name:'Abstrakt AB:13', tags: [{tag:'tag'}, {tag:'tag2'}]}, function(err, obj) {
+          assert(!err, err);
+          assert(obj.name);
+          assert(obj.id);
+          assert(obj.tags[0].id);
+          done();
+        });
+      });
+    });
     it('should enforce uniqueness on composed models', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.setUniqueKey('name', false, function(err) {
