@@ -18,9 +18,7 @@ describe('Seraph Model', function() {
   });
 
   after(function(done) {
-    neo.stop(function(err) {
-      neo.clean(done);
-    });
+    neo.stop(done);
   });
   describe('validation', function() {
     it('should fail save call when validation fails', function(done) {
@@ -210,7 +208,7 @@ describe('Seraph Model', function() {
       assert(!err);
       food.save({name:"Pinnekjøtt"}, function(err, meat) {
         assert(!err);
-        beer.query("start node({id})", { id: meat.id }, function(err, results) {
+        beer.query("start node=node({id})", { id: meat.id }, function(err, results) {
           assert(!err);
           assert(Array.isArray(results));
           assert(results.length == 0);
