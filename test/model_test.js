@@ -782,7 +782,7 @@ describe('Seraph Model', function() {
         {name:"Pinnekjøtt", matchingBeers: [{name:"Heady Topper"}] },
         function(err, meal) {
           assert(!err);
-          food.query("MATCH (node:Food) WHERE id(node) = {id}", { id: meal.id }, 'node', function(err, results) {
+          food.query("MATCH (node:Food) WHERE id(node) = {id}", { id: meal.id }, function(err, results) {
             assert(!err);
             assert(Array.isArray(results));
             assert.deepEqual(results[0], meal);
