@@ -699,6 +699,19 @@ all Cars with an age greater than `x` years. I might do a query like this:
   in your query `age`, and you specify it in `otherVars`, its value will be returned
   on each return model as the `age` property. Note that if a property with that
   name already exists, it will be overwritten (on the client, not in the database)
+* `include` - an array of included models. These are models which are related to
+  the model you'd like to retrieve, but not composed. Specifying them here will
+  automatically fetch these relations, and run any computations for that model
+  after reading. It's also just convenient so that you don't have to specify your
+  own MATCHes when you have non-composed relations. `include` should be an object,
+  where each key is the name of the property on the resulting node, and each value
+  is an object with the following options:
+  * `model` the seraph-model that will be read
+  * `rel` the relationship relating the root node and this model
+  * `direction` (optional - default: `out`) the direction of the relationship
+  * `many` (optional - default: `false`) if set to true, the result is always
+    and array
+  
 
 ```javascript
 Car.query('MATCH (car:car) WHERE car.age > {x}', { x: 10 }, { varName: 'car' }, function(err, cars) {
