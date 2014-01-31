@@ -306,6 +306,36 @@ describe('Seraph Model', function() {
     });
   });
 
+  it('should fetch out another model that is related', function(done) {
+    var beer = model(db, 'Beer' + Date.now());
+    var hop = model(db, 'Hop' + Date.now());
+
+    beer.save({ name: 'beer 1' }, function(err, beer1) {
+      assert(!err);
+      beer.save({ name: 'beer 2' }, function(err, beer2) {
+        assert(!err);
+        hop.save({ name: 'centennial' }, function(err, hop1) {
+          assert(!err);
+          db.relate([beer1, beer2], 'hopped_with', hop1, function(err, rel) {
+            assert(!err);
+            beer.findAll({
+              include: {hop: { model: hop, rel: 'hopped_with', direction: 'out' }}
+            }, function(err, nodes) {
+              assert(!err);
+              assert(nodes.length == 2);
+              console.log(nodes)
+              assert(nodes[0].hop.name == 'centennial');
+              assert(nodes[1].hop.name == 'centennial');
+              assert(nodes[0].name == 'beer 1');
+              assert(nodes[1].name == 'beer 2');
+              done();
+            });
+          });
+        });
+      });
+    });
+  });
+
   it('should save a model with a string id', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
