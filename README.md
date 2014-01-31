@@ -653,20 +653,29 @@ Reads a model from the database given an id or an object containing the id.
 Check if a model exists.
 
 <a name="findAll"/>
-#### `model.findAll(callback(err, allOfTheseModels))`
+#### `model.findAll([opts,] callback(err, allOfTheseModels))`
 
 Finds all of the objects that were saved with this type. Returns composited nodes.
 
+`opts` is a set of options to pass to the read call. See [query](#query) for
+available settings.
+
 <a name="where"/>
-#### `model.where(predicate, any, callback(err, matchingModels))`
+#### `model.where(predicate, [opts,] callback(err, matchingModels))`
 
 This is a operationally similar to 
 [seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
 restricted to searching for nodes marked as this kind of model only. Will also
 return composited nodes. 
 
+`opts` is a set of options to pass to the [query](#query) call. Special options
+for `where`:
+
+* `any` (default = `false`) - if set to true, will match nodes with any of the
+  specified values, rather than nodes with all of them. 
+
 <a name="query"/>
-#### `model.query(query, params, opts, callback)`
+#### `model.query(query, params, [opts,] callback)`
 
 Takes a partial cypher query and extends it to retrieve seraph-models of this 
 type. This is useful if you have computed properties or compositions. The `query`
