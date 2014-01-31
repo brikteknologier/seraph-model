@@ -262,6 +262,28 @@ describe('Seraph Model', function() {
     });
   });
 
+  it('should allow "where" queries with options', function(done) {
+    var beer = model(db, 'Beer' + Date.now());
+
+    async.forEach(_.range(0,25), function(num, callback) {
+      beer.save({name:'amazing duplicate beer',sn:Math.ceil(Math.random() * 100000)}, callback);
+    }, function(err) {
+      beer.where({ name: 'amazing duplicate beer' }, {
+        varName: "beer",
+        skip: 5,
+        limit: 15,
+        orderBy: 'beer.sn DESC'
+      }, function(err, nodes) {
+        assert(!err);
+        assert(nodes.length == 15);
+        for (var i = 0; i + 1 < nodes.length; ++i) {
+          assert(nodes[i].sn > nodes[i + 1].sn);
+        }
+        done();
+      });
+    });
+  });
+
   it('should save a model with a string id', function(done) {
     var beer = model(db, 'Beer');
     var food = model(db, 'Food');
