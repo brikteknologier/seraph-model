@@ -323,11 +323,11 @@ describe('Seraph Model', function() {
             }, function(err, nodes) {
               assert(!err);
               assert(nodes.length == 2);
-              console.log(nodes)
               assert(nodes[0].hop.name == 'centennial');
               assert(nodes[1].hop.name == 'centennial');
-              assert(nodes[0].name == 'beer 1');
-              assert(nodes[1].name == 'beer 2');
+              assert(nodes[0].name == 'beer 1' || nodes[0].name == 'beer 2');
+              assert(nodes[1].name == 'beer 1' || nodes[1].name == 'beer 2');
+              
               done();
             });
           });
