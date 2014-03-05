@@ -559,6 +559,60 @@ describe('Seraph Model', function() {
       });
 
     });
+    it('should fire beforeSave and afterSave events for pushComposition', function(done) {
+      var beforeFoodSaveCount = 0,
+          afterFoodSaveCount = 0;
+
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+
+      food.on('beforeSave', function() { ++beforeFoodSaveCount });
+      food.on('afterSave', function() { ++afterFoodSaveCount });
+
+      food.compose(beer, 'matchingBeers', 'matches');
+
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        assert(beforeFoodSaveCount == 1);
+        assert(afterFoodSaveCount == 1);
+        food.push(meal, 'matchingBeers', { name: 'Pacific IPA' }, function(err, meal) {
+          assert(!err);
+          assert(beforeFoodSaveCount == 2);
+          assert(afterFoodSaveCount == 2);
+          done();
+        });
+      });
+    });
+    it('should fire beforeSave and afterSave events for saveComposition', function(done) {
+      var beforeFoodSaveCount = 0,
+          afterFoodSaveCount = 0;
+
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+
+      food.on('beforeSave', function() { ++beforeFoodSaveCount });
+      food.on('afterSave', function() { ++afterFoodSaveCount });
+
+      food.compose(beer, 'matchingBeers', 'matches');
+
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err);
+        assert(beforeFoodSaveCount == 1);
+        assert(afterFoodSaveCount == 1);
+        food.saveComposition(meal, 'matchingBeers', { name: 'Pacific IPA' }, function(err, meal) {
+          assert(!err);
+          assert(beforeFoodSaveCount == 2);
+          assert(afterFoodSaveCount == 2);
+          done();
+        });
+      });
+    });
     it('should handle presave async transforms', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
