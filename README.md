@@ -811,7 +811,7 @@ You will need to write your own script to use it.
 You can include the migration function like so:
 
 ```
-var migrate = require('seraph-model/migrations/0.5.*-to-0.6.*');
+var migrate = require('seraph-model/migrations/0.5-to-0.6');
 ```
 
 This function has the following signature:
