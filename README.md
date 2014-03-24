@@ -37,6 +37,10 @@ change the Neo4j version at the start of the tests to the version you're running
 
 Is [here](#thechangelist).
 
+## License
+
+seraph-model is licensed with the MIT license.
+
 # Documentation
 
 ## How to do things

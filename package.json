@@ -6,7 +6,7 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha -R spec -t 360000"
   },
-  "license": "BSD",
+  "license": "MIT",
   "dependencies": {
     "async": "~0.1.22",
     "underscore": "~1.5.0",
