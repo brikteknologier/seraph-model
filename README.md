@@ -670,7 +670,16 @@ available settings.
 This is a operationally similar to 
 [seraph.find](https://github.com/brikteknologier/seraph#node.find), but is
 restricted to searching for nodes marked as this kind of model only. Will also
-return composited nodes. 
+return composited nodes.
+
+`predicate` can also contain Javascript RegExp objects for some values. For instance, to make a case 
+insensitive request, one might use :
+
+```javascript
+Car.where({ make: new RegExp('Aston Martin', 'i') }, { varName: "car" }, function(err, cars) {
+  // `cars` might have 'ASTON MARTIN', 'aston martin', 'AsToN mArTiN' (and many others) as `make` values... as long as James Bond's driving.
+});
+```
 
 `opts` is a set of options to pass to the [query](#query) call. Special options
 for `where`:
