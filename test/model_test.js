@@ -284,6 +284,27 @@ describe('Seraph Model', function() {
     });
   });
 
+  it('should allow "where" queries with regexp fields', function(done) {
+    var beer = model(db, 'Beer' + Date.now());
+    beer.save({name:'Beer'}, function(err, beer1) {
+      assert(!err);
+      beer.save({name:'BeEr'}, function(err, beer1) {
+        assert(!err);
+        beer.where({ name: new RegExp('BEER', 'i') }, {
+          varName: "beer",
+          skip: 0,
+          limit: 15,
+          orderBy: 'beer.sn DESC'
+        }, function(err, nodes) {
+          assert(!err);
+          assert(nodes.length == 2);
+
+          done();
+        });
+      });
+    });
+  });
+
   it('should allow "findAll" queries with options', function(done) {
     var beer = model(db, 'Beer' + Date.now());
 
