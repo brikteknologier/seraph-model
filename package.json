@@ -9,8 +9,9 @@
   "license": "MIT",
   "dependencies": {
     "async": "~0.1.22",
-    "underscore": "~1.5.0",
-    "moment": "~2.0.0"
+    "disposable-seraph": "^0.3.1",
+    "moment": "~2.0.0",
+    "underscore": "~1.5.0"
   },
   "devDependencies": {
     "mocha": "*",
