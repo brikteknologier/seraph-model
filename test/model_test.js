@@ -426,6 +426,57 @@ describe('Seraph Model', function() {
       });
 
     });
+    it('it should allow transient composition', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'drink', 'goes_with', {
+        transient: true
+      });
+
+      food.save({name:'Pinnekjøtt'}, function(err, pinnekjøtt) {
+        assert(!err);
+        beer.save({name: 'Humlekanon'}, function(err, hk) {
+          assert(!err);
+          db.relate(pinnekjøtt, 'goes_with', hk, function(err) {
+            assert(!err);
+            food.read(pinnekjøtt, function(err, res) {
+              assert(!err);
+              assert(res.drink);
+              assert.equal(res.drink.name, 'Humlekanon');
+              done();
+            });
+          });
+        });
+      });
+    });
+    it('it should not save transient compositions', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'drink', 'goes_with', {
+        transient: true
+      });
+
+      food.save({name:'Pinnekjøtt'}, function(err, pinnekjøtt) {
+        assert(!err);
+        beer.save({name: 'Humlekanon'}, function(err, hk) {
+          assert(!err);
+          db.relate(pinnekjøtt, 'goes_with', hk, function(err) {
+            assert(!err);
+            food.read(pinnekjøtt, function(err, res) {
+              assert(!err);
+              res.drink.name = 'Lervig Rye IPA';
+              food.save(res, function(err) {
+                assert(!err);
+                food.read(res, function(err, res2) {
+                  assert(!err);
+                  assert.equal(res2.drink.name, 'Humlekanon');
+                });
+              });
+            });
+          });
+        });
+      });
+    });
     it('it should allow exclusion of composed models on save', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
