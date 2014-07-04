@@ -10,7 +10,7 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.0.0" }, function(err, _db, _neo) {
+    seraph({ version: "2.0.3" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
@@ -464,12 +464,16 @@ describe('Seraph Model', function() {
             assert(!err);
             food.read(pinnekjøtt, function(err, res) {
               assert(!err);
+              assert(res.drink);
+              assert.equal(res.drink.name, 'Humlekanon');
               res.drink.name = 'Lervig Rye IPA';
               food.save(res, function(err) {
                 assert(!err);
                 food.read(res, function(err, res2) {
                   assert(!err);
+                  assert(res2.drink);
                   assert.equal(res2.drink.name, 'Humlekanon');
+                  done();
                 });
               });
             });
