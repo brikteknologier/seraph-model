@@ -10,7 +10,7 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.0.3" }, function(err, _db, _neo) {
+    seraph({ version: "2.1.2" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
@@ -219,7 +219,7 @@ describe('Seraph Model', function() {
     });
 
   });
-  
+
   it('querying should allow other variables and preserve them', function(done) {
     var beer = model(db, 'Beer');
 
@@ -227,8 +227,8 @@ describe('Seraph Model', function() {
       assert(!err);
       beer.save({name:"Galaxy IPA"}, function(err, galaxy) {
         assert(!err);
-        beer.query("match (beer:Beer) where id(beer) in {ids} with beer, {test: true} as stuff", 
-          { ids: [heady.id, galaxy.id] }, {varName: 'beer', otherVars: ['stuff']}, 
+        beer.query("match (beer:Beer) where id(beer) in {ids} with beer, {test: true} as stuff",
+          { ids: [heady.id, galaxy.id] }, {varName: 'beer', otherVars: ['stuff']},
           function(err, results) {
           assert(!err);
           assert(results.length == 2);
@@ -348,7 +348,7 @@ describe('Seraph Model', function() {
               assert(nodes[1].hop.name == 'centennial');
               assert(nodes[0].name == 'beer 1' || nodes[0].name == 'beer 2');
               assert(nodes[1].name == 'beer 1' || nodes[1].name == 'beer 2');
-              
+
               done();
             });
           });
