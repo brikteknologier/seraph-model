@@ -69,7 +69,8 @@ seraph-model is licensed with the MIT license.
 * [model.fields](#fields)
 * [model.setUniqueKey](#setUniqueKey)
 * [model.useTimestamps](#useTimestamps)
-* [model.addComputedField](#addComputeField)
+* [model.addComputedField](#addComputedField)
+* [model.addComputer](#addComputer)
 * [model.cypherStart](#cypherStart)
 
 <a name="create"/>
@@ -408,8 +409,8 @@ in the database) and can be composed of other fields on the object or external
 information. You specify the field that you want to be computed, and the function 
 that should be used to compute the value of that field for the model, and it will 
 automatically be computed every time the model is read (and removed from the
-model just before saving). You can use the [addComputedField](#addComputedField)
-to add a computed field.
+model just before saving). You can use [addComputedField](#addComputedField) or
+[addComputer](#addComputer) to add a computed field.
 
 Example:
 
@@ -780,6 +781,15 @@ be updated.
 #### `model.addComputedField(fieldName, computer)`
 
 Add a [computed field](#computed-fields) to a model.
+
+<a name="addComputer"/>
+#### `model.addComputer(fieldNameArray, computer)`
+
+Add multiple [computed fields](#computed-fields) to a model, that are computed
+with a single computer. `computer` is a function that takes arguments `obj` and
+`callback`, and calls a callback with `err` and a modified `obj` with the computed
+fields added. `fieldNameArray` is an array of names of computed properties. These
+need to be known so that they will not be persisted back into the database.
 
 <a name='thechangelist'/>
 # Changelist
