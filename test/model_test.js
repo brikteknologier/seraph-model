@@ -1275,6 +1275,27 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('should add multiple computed fields with a single computer', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.addComputer(['title', 'date_read'], function(obj, cb) {
+        obj.title = obj.brewery + ' ' + obj.beer;
+        obj.date_read = 'today';
+        cb(null,obj)
+      });
+      beer.save({
+        brewery: 'Sierra Nevada',
+        beer: 'Pale Ale'
+      }, function(err, brew) {
+        assert(!err);
+        assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+        assert.equal(brew.date_read, 'today');
+        beer.read(brew, function(err, brew) {
+          assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+          assert.equal(brew.date_read, 'today');
+          done();
+        });
+      });
+    });
     it('shouldn\'t actually save computed field', function(done) {
       var beer = model(db, 'Beer'+Date.now());
       beer.addComputedField('title', function(obj) {
@@ -1288,6 +1309,28 @@ describe('Seraph Model', function() {
         assert.equal(brew.title, 'Sierra Nevada Pale Ale');
         db.read(brew, function(err, brew) {
           assert(!brew.title);
+          done();
+        });
+      });
+    });
+    it('shouldn\'nt save multiple computed fields with a single computer', function(done) {
+      var beer = model(db, 'Beer'+Date.now());
+      beer.addComputer(['title', 'date_read'], function(obj, cb) {
+        obj.title = obj.brewery + ' ' + obj.beer;
+        obj.date_read = 'today';
+        cb(null,obj)
+      });
+      beer.save({
+        brewery: 'Sierra Nevada',
+        beer: 'Pale Ale'
+      }, function(err, brew) {
+        assert(!err);
+        assert.equal(brew.title, 'Sierra Nevada Pale Ale');
+        assert.equal(brew.date_read, 'today');
+        db.read(brew, function(err, brew) {
+          assert(!err, err);
+          assert(brew.title == null);
+          assert(brew.date_read == null);
           done();
         });
       });
