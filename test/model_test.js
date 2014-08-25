@@ -542,12 +542,12 @@ describe('Seraph Model', function() {
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
 
-      beer.on('validate', function(obj, cb) { cb(false) });
+      beer.on('validate', function(obj, cb) { cb(true) });
 
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
-      ]}, function(err, meal) {
+      ]}, true, function(err, meal) {
         assert(!err, err);
         done();
       });
@@ -562,7 +562,7 @@ describe('Seraph Model', function() {
       food.save({name:"Pinnekjøtt", matchingBeers:[
         {name:"Heady Topper"},
         {name:"Hovistuten"}
-      ]}, function(err, meal) {
+      ]},true, function(err, meal) {
         assert(!err, err);
         done();
       });
