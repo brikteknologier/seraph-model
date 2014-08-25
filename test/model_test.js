@@ -481,13 +481,26 @@ describe('Seraph Model', function() {
         });
       });
     });
-    it('should not run before/after comp events on transient compositions', function(done) {
+    it('should not run before-save comp events on transient compositions', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'drink', 'goes_with', {
         transient: true
       });
       beer.on('validate', function(obj, cb) { cb(true) });
+
+      food.save({name:'Pinnekjøtt', drink: {name: 'Humlekanon'}}, function(err, pinnekjøtt) {
+        assert(!err);
+        done()
+      });
+    });
+    it('should not run after-save comp events on transient compositions', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'drink', 'goes_with', {
+        transient: true
+      });
+      beer.on('afterSave', function(obj, cb) { assert(false) });
 
       food.save({name:'Pinnekjøtt', drink: {name: 'Humlekanon'}}, function(err, pinnekjøtt) {
         assert(!err);
