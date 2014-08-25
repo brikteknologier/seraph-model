@@ -552,6 +552,21 @@ describe('Seraph Model', function() {
         done();
       });
     });
+    it('it should not fire afterSave event on excluded compositions', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'matchingBeers', 'matches');
+
+      beer.on('afterSave', function(obj) { assert(false) });
+
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper"},
+        {name:"Hovistuten"}
+      ]}, function(err, meal) {
+        assert(!err, err);
+        done();
+      });
+    });
     it('it should allow saving of only a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
