@@ -481,6 +481,19 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('should not run before/after comp events on transient compositions', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      food.compose(beer, 'drink', 'goes_with', {
+        transient: true
+      });
+      beer.on('validate', function(obj, cb) { cb(true) });
+
+      food.save({name:'Pinnekjøtt', drink: {name: 'Humlekanon'}}, function(err, pinnekjøtt) {
+        assert(!err);
+        done()
+      });
+    });
     it('it should allow exclusion of composed models on save', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
