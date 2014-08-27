@@ -725,6 +725,12 @@ all Cars with an age greater than `x` years. I might do a query like this:
   * `direction` (optional - default: `out`) the direction of the relationship
   * `many` (optional - default: `false`) if set to true, the result is always
     and array
+* `computeLevels` - compute computed variables on models up to this depth in the
+  composition graph. This may be desirable if you are reading many nodes, and
+  you have computations that cause a database query to be executed. This can
+  grow very quickly to a lot of http calls, and so `computeLevels` can be used
+  to restrict the computation to only your root model (0) or the closest
+  compositions (1, etc).
   
 
 ```javascript
