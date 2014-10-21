@@ -10,7 +10,7 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.1.2" }, function(err, _db, _neo) {
+    seraph({ version: "2.1.5" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
