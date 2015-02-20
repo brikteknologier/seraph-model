@@ -582,7 +582,7 @@ Ensure this property exists. Validation will fail if it null or undefined.
 <a name="schema.match"/>
 ### `match`
 
-Values should match this regular expression. Validation will value if the value
+Values should match this regular expression. Validation will fail if the value
 does not.
 
 **Default value:** `undefined`.
