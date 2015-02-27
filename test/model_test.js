@@ -21,6 +21,7 @@ describe('Seraph Model', function() {
   after(function(done) {
     neo.stop(done);
   });
+
   describe('validation', function() {
     it('should fail save call when validation fails', function(done) {
       var beer = model(db, 'Beer');
@@ -198,7 +199,6 @@ describe('Seraph Model', function() {
         });
       })
     });
-
   });
 
   it('querying should only read the relevant model', function(done) {
@@ -217,7 +217,6 @@ describe('Seraph Model', function() {
         });
       })
     });
-
   });
 
   it('querying should allow other variables and preserve them', function(done) {
@@ -401,7 +400,6 @@ describe('Seraph Model', function() {
         });
       })
     });
-
   });
 
   describe('sm#Composition', function() {
@@ -424,7 +422,6 @@ describe('Seraph Model', function() {
           done();
         });
       });
-
     });
     it('it should allow transient composition', function(done) {
       var beer = model(db, 'Beer');
@@ -535,7 +532,6 @@ describe('Seraph Model', function() {
           });
         });
       });
-
     });
     it('it should not fire beforeSave event on excluded compositions', function(done) {
       var beer = model(db, 'Beer');
@@ -601,7 +597,6 @@ describe('Seraph Model', function() {
           });
         });
       });
-
     });
     it('should not compute beyond a certain level if desired', function(done) {
       var beer = model(db, 'Beer');
@@ -618,7 +613,6 @@ describe('Seraph Model', function() {
         assert(!err);
         food.read(meal.id, {computeLevels:1}, function(err, meal) {
           assert(!err,err);
-          console.log(meal.matchingBeers);
           assert(!meal.matchingBeers.hops.compute_test)
           done();
         });
@@ -639,14 +633,14 @@ describe('Seraph Model', function() {
         assert(meal.matchingBeers[1].id);
         beer.read(meal.matchingBeers[0].id, function(err, model) {
           assert(!err);
-          assert.deepEqual(model, meal.matchingBeers[0]);
+          assert.deepEqual(_.extend(model, {_rel: {}}), meal.matchingBeers[0]);
           meal.matchingBeers.push({name: 'New Beer!'});
           food.save(meal, function(err, meal) {
             assert(!err);
             assert.equal(meal.matchingBeers.length, 3)
             beer.read(meal.matchingBeers[2].id, function(err, model) {
               assert(!err)
-              assert.deepEqual(model, meal.matchingBeers[2]);
+              assert.deepEqual(_.extend(model, {_rel: {}}), meal.matchingBeers[2]);
               done()
             });
           });
@@ -681,7 +675,6 @@ describe('Seraph Model', function() {
           });
         });
       });
-
     });
     it('it should fire the before and after save events for composed models', function(done) {
       var beforeBeerSaveCount = 0,
@@ -710,7 +703,6 @@ describe('Seraph Model', function() {
         assert(afterFoodSaveCount == 1);
         done();
       });
-
     });
     it('should fire beforeSave and afterSave events for pushComposition', function(done) {
       var beforeFoodSaveCount = 0,
@@ -796,7 +788,6 @@ describe('Seraph Model', function() {
         assert(meal.matchingBeers[1].thingy == 'prepared');
         done();
       });
-
     });
     it('should properly index models', function(done) {
       var beer = model(db, 'Beer');
@@ -878,6 +869,30 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('should read composition relation properties', function(done) {
+      var beer = model(db, 'Beer');
+      var ingerdient = model(db, 'Ingerdient');
+      beer.compose(ingerdient, 'ingerdients', 'contains_ingerdients');
+
+      beer.save({
+        name: 'Orval',
+        ingerdients: [{
+          name: 'Strisselspalt',
+          _rel: { quantity: 'a little' }
+        }, {
+          name: 'Much love',
+          _rel: { quantity: '2 spoons' }
+        }]
+      }, function (err, orval) {
+        assert(!err, err);
+
+        beer.read(orval.id, function (err, readOrval) {
+          assert(!err, err);
+          assert.deepEqual(orval, readOrval);
+          done();
+        })
+      });
+    });
     it('should update a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -931,7 +946,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should order a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -961,7 +975,6 @@ describe('Seraph Model', function() {
         });
       });
     });
-
     it('should push multiple nodes to a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
@@ -1096,8 +1109,7 @@ describe('Seraph Model', function() {
         done();
       });
     });
-
-    it ('should allow custom queries and add compositions', function(done) {
+    it('should allow custom queries and add compositions', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
       food.compose(beer, 'matchingBeers', 'matches');
@@ -1113,6 +1125,27 @@ describe('Seraph Model', function() {
             done();
           });
         });
+    });
+    it('should allow adding relationship properties', function (done) {
+      var beer = model(db, 'Beer');
+      var ingerdient = model(db, 'Ingerdient');
+      beer.compose(ingerdient, 'ingerdients', 'contains_ingerdients');
+
+      beer.save({
+        name: 'Orval',
+        ingerdients: [{
+          name: 'Strisselspalt',
+          _rel: { quantity: 'a little' }
+        }, {
+          name: 'Much love',
+          _rel: { quantity: '2 spoons' }
+        }]
+      }, function (err, orval) {
+        assert(!err, err);
+        assert.deepEqual(orval.ingerdients[0]._rel, { quantity: 'a little'});
+        assert.deepEqual(orval.ingerdients[1]._rel, { quantity: '2 spoons'});
+        done();
+      });
     });
   });
 

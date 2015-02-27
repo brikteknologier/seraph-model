@@ -3,6 +3,7 @@
   "version": "0.6.18",
   "description": "thin model layer for seraph/neo4j",
   "main": "lib/model.js",
+  "repository": "git@github.com:brikteknologier/seraph-model.git",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha -R spec -t 360000"
   },
