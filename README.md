@@ -293,6 +293,39 @@ beer.save(pliny, function(err, saved) {
 });
 ```
 
+<a name="composition.relations.properties"/>
+### Relations properties
+
+When you save a composed object, you can specify the relationship properties
+through the `_rel` key.
+
+**example**
+
+```javascript
+
+var pliny = {
+  name: 'Pliny the Elder',
+  brewery: 'Russian River',
+  hops: [
+    { name: 'Columbus', aa: '13.9%', _rel: { quantity: "a bit" } },
+    { name: 'Simcoe', aa: '12.3%', _rel: { quantity: "a lot" } },
+    { name: 'Centennial', aa: '8.0%' }
+  ]
+};
+
+beer.save(pliny, function(err, saved) {
+  console.log(saved);
+  /* -> { brewery: 'Russian River',
+          name: 'Pliny the Elder',
+          id: 11,
+          hops:
+           [ { name: 'Columbus', aa: '13.9%', _rel: { quantity: "a bit" } id: 12 },
+             { name: 'Simcoe', aa: '12.3%', _rel: { quantity: "a lot" }, id: 13 },
+             { name: 'Centennial', aa: '8.0%', id: 14 } ] }
+  */
+});
+```
+
 ### Updating models with compositions
 
 You can use the regular `model.save` function to update a model with 
@@ -632,6 +665,11 @@ Saves or updates an object in the database. The steps for doing this are:
 If `excludeCompositions` is truthy, any composed models attached to `object`
 will not be altered in the database (they will be ignored), and the object which 
 is returned will exclude compositions.
+
+You need to remember that the `_rel` key of any object is a reserved word for
+relations properties (see [Relations properties](#composition.relations.properties))
+and will be stripped from the object when saving, so it's not recommended using
+this name in your model.
 
 <a name="push"/>
 #### `model.push(rootId, compName, object(s), callback(err, savedObject(s)))`
