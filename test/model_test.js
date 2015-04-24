@@ -530,8 +530,8 @@ describe('Seraph Model', function() {
           assert.equal(newMeal.name, 'Burger');
           food.read(newMeal, function(err, newerMeal) {
             assert(!err);
-            assert.equal(newerMeal.matchingBeers[0].name, 'Heady Topper');
-            assert.equal(newerMeal.matchingBeers[1].name, 'Hovistuten');
+            assert(_.find(newerMeal.matchingBeers, function(b) { return b.name == 'Heady Topper' }))
+            assert(_.find(newerMeal.matchingBeers, function(b) { return b.name == 'Hovistuten' }))
             assert.equal(newerMeal.name, 'Burger');
             done()
           });
@@ -827,7 +827,9 @@ describe('Seraph Model', function() {
         assert(!err);
         food.read(meal, function(err, readMeal) {
           assert(!err,err);
-          assert.deepEqual(meal, readMeal);
+          assert(readMeal.name == "Pinnekjøtt");
+          assert(_.find(readMeal.matchingBeers, function(b) { return b.name == 'Heady Topper' }))
+          assert(_.find(readMeal.matchingBeers, function(b) { return b.name == 'Hovistuten' }))
           done();
         });
       });
@@ -848,7 +850,12 @@ describe('Seraph Model', function() {
         assert(!err);
         food.read(meal, 4, function(err, readMeal) {
           assert(!err,err);
-          assert.deepEqual(meal, readMeal);
+          assert.equal(meal.name, readMeal.name)
+          assert.equal(meal.matchingBeers.length, readMeal.matchingBeers.length);
+          var beer1 = _.find(readMeal.matchingBeers, function(b) { return b.name == meal.matchingBeers[0].name });
+          var beer2 = _.find(readMeal.matchingBeers, function(b) { return b.name == meal.matchingBeers[1].name });
+          assert(beer1)
+          assert(beer2)
           done();
         });
       });
@@ -869,7 +876,12 @@ describe('Seraph Model', function() {
         assert(!err);
         food.readComposition(meal, 'matchingBeers', function(err, hops) {
           assert(!err,err);
-          assert.deepEqual(hops, meal.matchingBeers);
+          var heady = _.find(hops, function(b) { return b.name == 'Heady Topper' });
+          var hovis = _.find(hops, function(b) { return b.name == 'Hovistuten' });
+          assert(heady.hops.name == 'CTZ');
+          assert(heady.hops.aa.percent == '15%');
+          assert(_.find(hovis.hops, function(b) { return b.name == 'Galaxy' }));
+          assert(_.find(hovis.hops, function(b) { return b.name == 'Simcoe' }))
           done();
         });
       });
@@ -893,7 +905,12 @@ describe('Seraph Model', function() {
 
         beer.read(orval.id, function (err, readOrval) {
           assert(!err, err);
-          assert.deepEqual(orval, readOrval);
+          var strisselspalt = _.find(readOrval.ingerdients, function(b) { return b.name == 'Strisselspalt' });
+          var muchLove = _.find(readOrval.ingerdients, function(b) { return b.name == 'Much love' });
+          assert(strisselspalt);
+          assert(muchLove);
+          assert.equal(strisselspalt._rel.quantity, 'a little');
+          assert.equal(muchLove._rel.quantity, '2 spoons');
           done();
         })
       });
@@ -943,9 +960,9 @@ describe('Seraph Model', function() {
           assert.equal(ale.name, 'Super tasty ale');
           food.read(meal, function(err, meal) {
             assert(!err);
-            assert.equal(meal.matchingBeers[0].name, 'Heady Topper');
-            assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
-            assert.equal(meal.matchingBeers[2].name, 'Super tasty ale');
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Heady Topper' }));
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Hovistuten' }));
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Super tasty ale' }));
             done()
           });
         });
@@ -972,9 +989,9 @@ describe('Seraph Model', function() {
           assert.equal(ale.name, 'Super tasty ale');
           food.read(meal, function(err, meal) {
             assert(!err);
-            assert.equal(meal.matchingBeers[2].name, 'Heady Topper');
-            assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
-            assert.equal(meal.matchingBeers[0].name, 'Super tasty ale');
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Heady Topper' }));
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Hovistuten' }));
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Super tasty ale' }));
             done()
           });
         });
@@ -1000,10 +1017,10 @@ describe('Seraph Model', function() {
           assert.equal(ale[1].name, 'Vildhjarta');
           food.read(meal, function(err, meal) {
             assert(!err);
-            assert.equal(meal.matchingBeers[0].name, 'Heady Topper');
-            assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
-            assert.equal(meal.matchingBeers[2].name, 'Super tasty ale');
-            assert.equal(meal.matchingBeers[3].name, 'Vildhjarta');
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Heady Topper' }))
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Hovistuten' }))
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Super tasty ale' }))
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Vildhjarta' }))
             done()
           });
         });
@@ -1027,9 +1044,9 @@ describe('Seraph Model', function() {
             assert.equal(ale.name, 'Super tasty ale');
             food.read(meal, function(err, meal) {
               assert(!err);
-              assert.equal(meal.matchingBeers[0].name, 'Heady Topper');
-              assert.equal(meal.matchingBeers[1].name, 'Hovistuten');
-              assert.equal(meal.matchingBeers[2].name, 'Super tasty ale');
+              assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Heady Topper' }))
+              assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Hovistuten' }))
+              assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Super tasty ale' }))
               done()
             });
           });
@@ -1056,7 +1073,7 @@ describe('Seraph Model', function() {
           food.read(meal, function(err, meal) {
             assert(meal.name == 'Pinnekjøtt');
             assert(meal.matchingBeers.length == 3);
-            assert(meal.matchingBeers[2].name == 'Imperialfjellet');
+            assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Imperialfjellet' }))
             done();
           });
         });
@@ -1078,8 +1095,8 @@ describe('Seraph Model', function() {
               assert(!err)
               assert(meal.name == 'Pinnekjøtt');
               assert(meal.matchingBeers.length == 2);
-              assert(meal.matchingBeers[0].name == 'Heady Topper');
-              assert(meal.matchingBeers[1].name == 'Imperialfjellet');
+              assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Imperialfjellet' }))
+              assert(_.find(meal.matchingBeers, function(b) { return b.name == 'Heady Topper' }))
               done();
             });
           });
