@@ -14,7 +14,12 @@ describe('Seraph Model', function() {
       if (err) return done(err);
       db = _db;
       neo = _neo;
-      done()
+      db.changePassword('password', function(err) {
+        if (err) {
+          db.options.pass = 'password';
+          done()
+        } else done()
+      });
     });
   });
 
