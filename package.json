@@ -16,30 +16,5 @@
   "devDependencies": {
     "disposable-seraph": "^0.3.4",
     "mocha": "*"
-  },
-  "bugs": {
-    "url": "https://github.com/brikteknologier/seraph-model/issues"
-  },
-  "homepage": "https://github.com/brikteknologier/seraph-model",
-  "_id": "seraph-model@0.7.2",
-  "dist": {
-    "shasum": "7b3be196abd59236f9fd32a160be97b6d08cbacf",
-    "tarball": "http://registry.npmjs.org/seraph-model/-/seraph-model-0.7.2.tgz"
-  },
-  "_from": "seraph-model@>=0.7.2 <0.8.0",
-  "_npmVersion": "1.4.6",
-  "_npmUser": {
-    "name": "jonpacker",
-    "email": "contact@jonpacker.com"
-  },
-  "maintainers": [
-    {
-      "name": "jonpacker",
-      "email": "contact@jonpacker.com"
-    }
-  ],
-  "directories": {},
-  "_shasum": "7b3be196abd59236f9fd32a160be97b6d08cbacf",
-  "_resolved": "https://registry.npmjs.org/seraph-model/-/seraph-model-0.7.2.tgz",
-  "readme": "ERROR: No README data found!"
+  }
 }
