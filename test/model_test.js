@@ -623,6 +623,28 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('should not compute anything if desired', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      var hop = model(db, 'Hop');
+      food.compose(beer, 'matchingBeers', 'matches');
+      beer.compose(hop, 'hops', 'contains_hop');
+
+      hop.addComputedField('compute_test', function(thing) { return true });
+      beer.addComputedField('cpu_test', function(thing) { return true });
+
+      food.save({name:"Pinnekjøtt", matchingBeers:
+        {name:"Heady Topper", hops: {name: 'CTZ'}},
+      }, function(err, meal) {
+        assert(!err);
+        food.read(meal.id, {computeLevels:0}, function(err, meal) {
+          assert(!err,err);
+          assert(!meal.cpu_test);
+          assert(!meal.matchingBeers.hops.compute_test)
+          done();
+        });
+      });
+    });
     it('should allow implicit transformation of compositions', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
