@@ -27,6 +27,16 @@ describe('Seraph Model', function() {
     neo.stop(done);
   });
 
+  describe('export prototye', function() {
+    it ('should export the model prototype', function() {
+      model.modelPrototype.testValue = "testValue";
+      var tm1 = model(db, 'tm1');
+      var tm2 = model(db, 'tm2');
+      assert.equal(tm1.testValue, "testValue");
+      assert.equal(tm2.testValue, "testValue");
+    });
+  });
+
   describe('validation', function() {
     it('should fail save call when validation fails', function(done) {
       var beer = model(db, 'Beer');
