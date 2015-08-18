@@ -647,7 +647,7 @@ describe('Seraph Model', function() {
         {name:"Heady Topper", hops: {name: 'CTZ'}},
       }, function(err, meal) {
         assert(!err);
-        food.read(meal.id, {computeLevels:0}, function(err, meal) {
+        food.read(meal.id, {computeLevels:-1}, function(err, meal) {
           assert(!err,err);
           assert(!meal.cpu_test);
           assert(!meal.matchingBeers.hops.compute_test)
