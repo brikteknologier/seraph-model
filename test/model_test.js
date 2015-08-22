@@ -612,6 +612,7 @@ describe('Seraph Model', function() {
           });
         });
       });
+
     });
     it('should not compute beyond a certain level if desired', function(done) {
       var beer = model(db, 'Beer');
@@ -1201,8 +1202,67 @@ describe('Seraph Model', function() {
         done();
       });
     });
-  });
+    describe('set the direction', function() {
+      var beerId;
 
+      it('should support different directions on the relationships', function(done) {
+        var beer = model(db, 'Beer');
+        var people = model(db, 'People');
+        var ingredients = model(db, 'Ingredient');
+        beer.compose(people, 'lovers', 'loves', { direction: 'in', many: true });
+        beer.compose(ingredients, 'ingredients', 'contains_ingredients', { direction: 'out', many: true });
+
+        beer.save({
+          name: 'Orval',
+          lovers: [{name: 'Denis'}, {name: 'Samuel'}, { name: 'Maxime' }],
+          ingredients: [{ name: 'Strisselspalt', _rel: { quantity: 'a little' } }]
+        }, function(err, beer) {
+          beerId = beer.id;
+          assert(!err);
+          assert(Array.isArray(beer.lovers));
+          assert(beer.lovers[0].name == "Denis");
+          assert(beer.lovers[1].name == "Samuel");
+          assert(beer.lovers[2].name == "Maxime");
+          db.relationships(beer, function(err, rels) {
+            assert(!err);
+            assert(rels.length == 4);
+            db.relationships(beer.lovers[0].id, 'out', 'loves', function(err, relationships) {
+              assert(!err);
+              assert(beer.lovers[0].id == relationships[0].start);
+              assert(beer.id == relationships[0].end);
+
+              db.relationships(beer.ingredients[0].id, 'in', 'contains_ingredients', function(err, relationships) {
+                assert(!err);
+                assert(beer.ingredients[0].id == relationships[0].end);
+                assert(beer.id == relationships[0].start);
+                done();
+              });
+            });
+          });
+        });
+      });
+      it('should read a model with compositions', function(done) {
+        var beer = model(db, 'Beer');
+        var people = model(db, 'People');
+        var ingredients = model(db, 'Ingredient');
+        beer.compose(people, 'lovers', 'loves', { direction: 'in', many: true });
+        beer.compose(ingredients, 'ingredients', 'contains_ingredients', { direction: 'out', many: true });
+
+        beer.read(beerId, function(err, beer) {
+          assert(!err);
+          assert(beer.lovers.length === 3);
+          assert(beer.lovers[0].name === 'Denis');
+          assert(beer.lovers[1].name === 'Samuel');
+          assert(beer.lovers[2].name === 'Maxime');
+          assert(beer.ingredients.length === 1);
+          assert(beer.ingredients[0].name === 'Strisselspalt');
+          assert(beer.ingredients[0]._rel.quantity === 'a little');
+
+          done();
+        });
+      });
+    })
+  });
   describe('uniqueness', function() {
     it('should be able to set a unique key', function(done) {
       var beer = model(db, 'Beer'+Date.now());

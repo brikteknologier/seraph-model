@@ -349,7 +349,7 @@ Add a composition.
 * `key` — the key on an object being saved which will contained the composed 
   models.
 * `relationshipName` — the name of the relationship that is created between
-  a root model and its composed models. These relationships are always outgoing.
+  a root model and its composed models. These relationships can be specified outgoing or ingoing.
 * `opts` - an object with a set of options. possible options are documented
   below.
 
@@ -358,6 +358,7 @@ Add a composition.
 * `many` (default = `false`) — whether this is a *-to-many relationship. If 
   truthy, the this composition will always be represented as an array on the 
   base object.
+* `direction` (default = `out`) — specified the direction of the relationship.
 * `orderBy` (default = `null`) - how this composition should be ordered. This
   can be set to either the name of a property on the composed node to order with
   (ascending), or an object with the name of the property value and the order
