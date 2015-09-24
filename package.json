@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "async": "~0.1.22",
+    "async": "~0.2.9",
     "moment": "~2.0.0",
     "underscore": "~1.5.0"
   },
