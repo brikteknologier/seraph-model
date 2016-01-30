@@ -10,13 +10,15 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.2.1" }, function(err, _db, _neo) {
+    seraph({ version: "2.3.1" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
+      db.options.pass = 'neo4j';
       db.changePassword('password', function(err) {
         if (err) {
           db.options.pass = 'password';
+          delete db.options.authString;
           done()
         } else done()
       });
@@ -24,7 +26,9 @@ describe('Seraph Model', function() {
   });
 
   after(function(done) {
-    neo.stop(done);
+    neo.stop(function() {
+      done();
+    });
   });
 
   describe('export prototye', function() {
@@ -189,7 +193,7 @@ describe('Seraph Model', function() {
   it('it should read a model from the db', function(done) {
     var beer = model(db, 'Beer');
     beer.save({name:"120m IPA"}, function(err, dfh) {
-      assert(!err,err);
+      assert(!err,err.message);
       beer.read(dfh.id, function(err, thebeer) {
         assert(!err);
         assert(thebeer.name == "120m IPA");
