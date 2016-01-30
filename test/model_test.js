@@ -1584,6 +1584,27 @@ describe('Seraph Model', function() {
   });
   describe('Schemas', function() {
     describe('validation: fail', function() {
+      it('should automatically use the schema fields in the `fields` property', function(done) {
+        var beer = model(db, 'Beer');
+        beer.schema = {
+          type: String,
+          age: { type: Number, required: true }
+        };
+        beer.fields = ['name'];
+        beer.save({name: 'Moo Brew Imperial Stout',
+          type: 'Imperial Stout', 
+          age: 5 
+        }, function(err, result) {
+          assert(!err, err);
+          assert.equal(result.name, 'Moo Brew Imperial Stout');
+          assert.equal(result.type, 'Imperial Stout');
+          assert.equal(result.age, 5);
+          beer.read(result, function(err, result1) {
+            assert(!err, err);
+            assert.deepEqual(result, result1);
+          });
+        });
+      });
       it('should fail save call when validation fails: required', function(done) {
         var beer = model(db, 'Beer');
         beer.schema = {
