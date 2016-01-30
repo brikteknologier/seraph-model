@@ -193,7 +193,7 @@ describe('Seraph Model', function() {
   it('it should read a model from the db', function(done) {
     var beer = model(db, 'Beer');
     beer.save({name:"120m IPA"}, function(err, dfh) {
-      assert(!err,err.message);
+      assert(!err,err);
       beer.read(dfh.id, function(err, thebeer) {
         assert(!err);
         assert(thebeer.name == "120m IPA");
