@@ -422,14 +422,15 @@ index. For example:
 
 ```javascript
 var Tag = model(db, 'tag');
-Tag.setUniqueKey('tag', true);
-Tag.save({tag: 'finnish'}, function(err, tag) {
-  // tag -> { id: 1, tag: 'finnish' }
-  
-  // presumably later on, someone wants to save the same tag 
+Tag.setUniqueKey('tag', true, function() {
   Tag.save({tag: 'finnish'}, function(err, tag) {
-    // instead of saving another tag 'finnish', the first one was returned
     // tag -> { id: 1, tag: 'finnish' }
+    
+    // presumably later on, someone wants to save the same tag 
+    Tag.save({tag: 'finnish'}, function(err, tag) {
+      // instead of saving another tag 'finnish', the first one was returned
+      // tag -> { id: 1, tag: 'finnish' }
+    });
   });
 });
 ```
@@ -806,6 +807,9 @@ examples.
 Adds a uniqueness constraint to the database that makes sure `keyName` has a
 unique value for any nodes labelled as this kind of model. If the constraint
 already exists, no changes are made.
+
+**Note**: If you do not specify a callback, this mode will be set only on the
+seraph-model client. No constraint will be added to the database.
 
 See the [using a unique key](#unique-key) section for more information and
 examples.
