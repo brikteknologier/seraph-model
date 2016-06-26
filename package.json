@@ -1,0 +1,79 @@
+{
+  "_args": [
+    [
+      "seraph-model@^0.8.1",
+      "C:\\Users\\ofsta\\git\\koacms-pack-dev-2\\node_modules\\koacms-core"
+    ]
+  ],
+  "_from": "seraph-model@>=0.8.1 <0.9.0",
+  "_id": "seraph-model@0.8.1",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/seraph-model",
+  "_nodeVersion": "4.2.6",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/seraph-model-0.8.1.tgz_1463749104104_0.2186819810885936"
+  },
+  "_npmUser": {
+    "email": "contact@jonpacker.com",
+    "name": "jonpacker"
+  },
+  "_npmVersion": "2.14.12",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "seraph-model",
+    "raw": "seraph-model@^0.8.1",
+    "rawSpec": "^0.8.1",
+    "scope": null,
+    "spec": ">=0.8.1 <0.9.0",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "/koacms-core"
+  ],
+  "_resolved": "https://registry.npmjs.org/seraph-model/-/seraph-model-0.8.1.tgz",
+  "_shasum": "2e687d68610a5658f181621faaa032f5f35c4acc",
+  "_shrinkwrap": null,
+  "_spec": "seraph-model@^0.8.1",
+  "_where": "C:\\Users\\ofsta\\git\\koacms-pack-dev-2\\node_modules\\koacms-core",
+  "bugs": {
+    "url": "https://github.com/brikteknologier/seraph-model/issues"
+  },
+  "dependencies": {
+    "async": "^1.5.2",
+    "moment": "^2.11.1",
+    "underscore": "^1.8.3"
+  },
+  "description": "model layer for seraph/neo4j",
+  "devDependencies": {
+    "disposable-seraph": "^0.4.1",
+    "mocha": "*"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "2e687d68610a5658f181621faaa032f5f35c4acc",
+    "tarball": "https://registry.npmjs.org/seraph-model/-/seraph-model-0.8.1.tgz"
+  },
+  "gitHead": "cf30714a08f4bc4c6cfa2fee83dd18458d7a35e5",
+  "homepage": "https://github.com/brikteknologier/seraph-model#readme",
+  "license": "MIT",
+  "main": "lib/model.js",
+  "maintainers": [
+    {
+      "email": "contact@jonpacker.com",
+      "name": "jonpacker"
+    }
+  ],
+  "name": "seraph-model",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/brikteknologier/seraph-model.git"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha -R spec -t 360000"
+  },
+  "version": "0.8.1"
+}
