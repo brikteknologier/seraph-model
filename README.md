@@ -2,8 +2,6 @@ __seraph_model__ provides some convenient functions for storing and retrieving
 typed nodes from a neo4j database. It is intended to work with 
 [seraph](https://github.com/brikteknologier/seraph). 
 
-**using seraph-model < 0.6.0? please read [the changelist](#thechangelist)!**
-
 <a name="quick"/>
 ### Quick example
 
@@ -28,7 +26,7 @@ User.save({ name: 'Jon', city: 'Bergen' }, function(err, saved) {
 
 ## Compatibility
 
-seraph-model ^0.6.0 works with Neo4j 2.0.0 and higher.
+seraph-model ^0.8.3 works with Neo4j 2 and 3.
 
 To check if it works with your version, you should check out the repo, and
 change the Neo4j version at the start of the tests to the version you're running
