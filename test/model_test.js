@@ -431,7 +431,7 @@ describe('Seraph Model', function() {
         {name:"Heady Topper"},
         {name:"Hovistuten"}
       ]}, function(err, meal) {
-        assert(!err,err);
+        assert(!err,err && err.message);
         assert(meal.id != null)
         assert(meal.matchingBeers[0].id);
         assert(meal.matchingBeers[1].id);
