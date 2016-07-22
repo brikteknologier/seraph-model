@@ -10,7 +10,7 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "2.3.1" }, function(err, _db, _neo) {
+    seraph({ version: "3.0.3" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
@@ -360,7 +360,7 @@ describe('Seraph Model', function() {
             beer.findAll({
               include: {hop: { model: hop, rel: 'hopped_with', direction: 'out' }}
             }, function(err, nodes) {
-              assert(!err);
+              assert(!err, err && err.message);
               assert(nodes.length == 2);
               assert(nodes[0].hop.name == 'centennial');
               assert(nodes[1].hop.name == 'centennial');
