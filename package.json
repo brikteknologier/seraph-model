@@ -5,7 +5,7 @@
   "main": "lib/model.js",
   "repository": "git@github.com:brikteknologier/seraph-model.git",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha -R spec -t 360000"
+    "test": "./node_modules/mocha/bin/mocha -R spec -t 360000",
     "bolt-test": "BOLT=1 ./node_modules/mocha/bin/mocha -R spec -t 360000 -b"
   },
   "license": "MIT",
