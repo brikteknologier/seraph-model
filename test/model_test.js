@@ -1003,6 +1003,42 @@ describe('Seraph Model', function() {
         });
       });
     });
+    it('should additively update a composition', function(done) {
+      var beer = model(db, 'Beer');
+      var food = model(db, 'Food');
+      var hop = model(db, 'Hop');
+      var aa = model(db, 'AlphaAcid');
+      food.compose(beer, 'matchingBeers', 'matches');
+      beer.compose(hop, 'hops', 'contains_hop');
+      hop.compose(hop, 'aa', 'has_aa');
+
+      food.save({name:"Pinnekjøtt", matchingBeers:[
+        {name:"Heady Topper", hops: {name: 'CTZ',aa:{percent:'15%'}}},
+        {name:"Hovistuten", hops: [{name: 'Galaxy'},{name: 'Simcoe'}]}
+      ]}, function(err, meal) {
+        assert(!err);
+        meal.matchingBeers = [{name:"Blekfjellet", hops:
+          {name: 'El Dorado',aa:{percent:'10%'}}}];
+        food.update(meal, function(err, meal) {
+          assert(!err);
+          food.read(meal, 3,  function(err, meal) {
+            assert(meal.name == 'Pinnekjøtt');
+            assert.equal(meal.matchingBeers.length, 3);
+            var blek = meal.matchingBeers.filter(function(b) { return b.name == 'Blekfjellet' })[0];
+            assert(!!blek);
+            assert(blek.name == 'Blekfjellet');
+            assert(blek.hops.name == 'El Dorado');
+            assert(blek.hops.aa.percent == '10%');
+            var heady = meal.matchingBeers.filter(function(b) { return b.name == 'Heady Topper' })[0];
+            assert(!!heady);
+            assert(heady.name == 'Heady Topper');
+            assert(heady.hops.name == 'CTZ');
+            assert(heady.hops.aa.percent == '15%');
+            done();
+          });
+        });
+      });
+    });
     it('should push to a composition', function(done) {
       var beer = model(db, 'Beer');
       var food = model(db, 'Food');
