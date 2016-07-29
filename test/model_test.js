@@ -19,6 +19,8 @@ describe('Seraph Model', function() {
         if (err) {
           db.options.pass = 'password';
           delete db.options.authString;
+          if (process.env.BOLT)
+            db = require('seraph')({user:'neo4j', pass:'password', nodeify:true, bolt: true});
           done()
         } else done()
       });
