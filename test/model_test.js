@@ -1165,7 +1165,7 @@ describe('Seraph Model', function() {
 
       food.read({id: 5318008}, function(err, fud) {
         assert(!err);
-        assert.strictEqual(fud, false);
+        assert(!fud);
         done();
       });
     });
