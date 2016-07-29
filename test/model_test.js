@@ -395,6 +395,7 @@ describe('Seraph Model', function() {
   });
 
   it('should do an additive update', function(done) {
+    var beer = model(db, 'Beer');
     beer.save({name: 'Congress Street', omg: 55}, function(e, cs) {
       assert(!e);
       var newCs = {
@@ -402,7 +403,7 @@ describe('Seraph Model', function() {
         name: cs.name,
         potatoes: 7
       };
-      beer.save(newCs, function(e, saved) {
+      beer.update(newCs, function(e, saved) {
         assert(!e);
         assert.deepEqual(saved, {
           id: cs.id,

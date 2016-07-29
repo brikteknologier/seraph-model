@@ -57,6 +57,7 @@ seraph-model is licensed with the MIT license.
 * [model.read](#read)
 * [model.exists](#exists)
 * [model.save](#save)
+* [model.update](#update)
 * [model.push](#push)
 * [model.saveComposition](#saveComposition)
 * [model.findAll](#findAll)
@@ -669,6 +670,13 @@ You need to remember that the `_rel` key of any object is a reserved word for
 relations properties (see [Relations properties](#composition.relations.properties))
 and will be stripped from the object when saving, so it's not recommended using
 this name in your model.
+
+<a name="update"/>
+#### `model.update(object, [excludeCompositions,] callback(err, savedObject))`
+
+Additive version of [model.save](#save). Will not rewrite all properties on
+an object, and instead will only update the properties given on `object`. Otherwise
+behaves in the same way as [model.save](#save).
 
 <a name="push"/>
 #### `model.push(rootId, compName, object(s), callback(err, savedObject(s)))`
