@@ -393,6 +393,27 @@ describe('Seraph Model', function() {
       });
     });
   });
+
+  it('should do an additive update', function(done) {
+    beer.save({name: 'Congress Street', omg: 55}, function(e, cs) {
+      assert(!e);
+      var newCs = {
+        id: cs.id,
+        name: cs.name,
+        potatoes: 7
+      };
+      beer.save(newCs, function(e, saved) {
+        assert(!e);
+        assert.deepEqual(saved, {
+          id: cs.id,
+          name: cs.name,
+          potatoes: 7,
+          omg: 55
+        });
+        done();
+      });
+    });
+  });
   it('it should check if a model exists', function(done) {
     var beer = model(db, 'Beer');
     beer.save({name:"120m IPA"}, function(err, dfh) {
