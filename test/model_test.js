@@ -1221,7 +1221,6 @@ describe('Seraph Model', function() {
           beer.save({name: 'Pacific Ale'}, function(err, ale) {
             assert(!ale);
             assert(err);
-            assert.equal(err.statusCode, 409);
             done();
           });
         });
@@ -1277,7 +1276,6 @@ describe('Seraph Model', function() {
           food.save(meal, function(err, meal) {
             assert(!meal);
             assert(err);
-            assert.equal(err.statusCode, 409);
             done();
           });
         });
