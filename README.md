@@ -1,4 +1,4 @@
-__seraph_model__ provides some convenient functions for storing and retrieving
+__seraph-model__ provides some convenient functions for storing and retrieving
 typed nodes from a neo4j database. It is intended to work with 
 [seraph](https://github.com/brikteknologier/seraph). 
 
@@ -75,10 +75,10 @@ seraph-model is licensed with the MIT license.
 <a name="create"/>
 ## Creating a new model
 
-__seraph_model(seraphDbObject, modelTypeName)__
+`model = require('seraph-model)(seraphDbObject, modelTypeName)`
 
 You can create a new model by calling the function returned by requiring
-`seraph_model`. There are no instances of this model, only objects, which are 
+`seraph-model`. There are no instances of this model, only objects, which are 
 passed to the model itself in order to perform work on it. Much like seraph
 itself.
 
@@ -87,7 +87,7 @@ It works by labelling each object with a `type` that you specify.
 ### Example
 ```javascript
 var db = require('seraph')('http://localhost:7474');
-var Beer = require('seraph_model')(db, 'beer');
+var Beer = require('seraph-model')(db, 'beer');
 
 Beer.save({name: 'Pacific Ale', brewery: 'Stone & Wood'}, function(err, beer) {
   // saved!
@@ -182,6 +182,8 @@ There's a few events you can listen on:
 ```javascript
 model.on('beforeSave', function(obj) {
   console.log(obj, "is about to be saved");
+  obj.foo = 'bar';
+  return obj;
 })
 ```
 
