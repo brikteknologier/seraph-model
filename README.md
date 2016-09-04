@@ -347,7 +347,7 @@ Add a composition.
 * `model` — the model which is being composed
 * `key` — the key on an object being saved which will contained the composed 
   models.
-* `relName` — the name of the relationship that is created between
+* `relName` — the name/label of the relationship that is created between
   a root model and its composed models. These relationships are always outgoing.
 * `opts` - an object with a set of options. possible options are documented
   below.
@@ -766,7 +766,7 @@ all Cars with an age greater than `x` years. I might do a query like this:
   where each key is the name of the property on the resulting node, and each value
   is an object with the following options:
   * `model` the seraph-model that will be read
-  * `relName` the relationship relating the root node and this model
+  * `relName` the name/label of the relationship relating the root node and this model
   * `direction` (optional - default: `out`) the direction of the relationship
   * `many` (optional - default: `false`) if set to true, the result is always
     and array
