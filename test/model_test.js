@@ -10,7 +10,7 @@ describe('Seraph Model', function() {
   var neo;
   var db;
   before(function(done) {
-    seraph({ version: "3.0.3" }, function(err, _db, _neo) {
+    seraph({ version: "3.1.1" }, function(err, _db, _neo) {
       if (err) return done(err);
       db = _db;
       neo = _neo;
@@ -360,7 +360,7 @@ describe('Seraph Model', function() {
           db.relate([beer1, beer2], 'hopped_with', hop1, function(err, rel) {
             assert(!err);
             beer.findAll({
-              include: {hop: { model: hop, rel: 'hopped_with', direction: 'out' }}
+              include: {hop: { model: hop, relName: 'hopped_with', direction: 'out' }}
             }, function(err, nodes) {
               assert(!err, err && err.message);
               assert(nodes.length == 2);
