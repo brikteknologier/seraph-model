@@ -768,6 +768,7 @@ all Cars with an age greater than `x` years. I might do a query like this:
   * `model` the seraph-model that will be read
   * `relName` the name/label of the relationship relating the root node and this model
   * `direction` (optional - default: `out`) the direction of the relationship
+    (valid options are: `in`, `out` or `many`).
   * `many` (optional - default: `false`) if set to true, the result is always
     and array
 * `computeLevels` - compute computed variables on models up to this depth in the
@@ -900,4 +901,3 @@ migrate(db, models, [migrateTimestamps,] [migrateTimestampsFn,] callback)
 * `migrateTimestampsFn` - a function to take a timestamp of your old format, and
   conver it to milliseconds since 1970/01/01. defaults to `function(ts) { return ts * 1000 }`.
 * `callback` - function to call when the migration is complete.
-
