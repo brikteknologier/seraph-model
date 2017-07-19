@@ -3,6 +3,7 @@ typed nodes from a neo4j database. It is intended to work with
 [seraph](https://github.com/brikteknologier/seraph). 
 
 <a name="quick"/>
+
 ### Quick example
 
 ```javascript
@@ -54,6 +55,7 @@ seraph-model is licensed with the MIT license.
 * [Schemas](#schemas)
 
 ## Model instance methods
+
 * [model.read](#read)
 * [model.exists](#exists)
 * [model.save](#save)
@@ -73,6 +75,7 @@ seraph-model is licensed with the MIT license.
 * [model.cypherStart](#cypherStart)
 
 <a name="create"/>
+
 ## Creating a new model
 
 `model = require('seraph-model)(seraphDbObject, modelTypeName)`
@@ -85,6 +88,7 @@ itself.
 It works by labelling each object with a `type` that you specify.
 
 ### Example
+
 ```javascript
 var db = require('seraph')('http://localhost:7474');
 var Beer = require('seraph-model')(db, 'beer');
@@ -98,6 +102,7 @@ After running this, your node is saved, and labelled as a `beer`, so a cypher
 query like `MATCH node:beer RETURN node` would return your node.
 
 <a name="preparation"/>
+
 ## Adding preparers
 
 __Preparers__ are functions that are called upon an object to transform it
@@ -137,7 +142,9 @@ mode.save({file: 'nonexistant.txt'}, function(err, object) {
 ```
 
 <a name="validation"/>
+
 ## Adding validators
+
 __Validators__ are functions that are called with an object before it is saved.
 If they call back with anything that is not falsy, the saving process is halted,
 and the error from the validator function is returned to the save callback.
@@ -170,6 +177,7 @@ model.save({ name: 'Jordan', age: 17 }, function(err, person) {
 ```
 
 <a name="saveevents"/>
+
 ## Save events
 
 There's a few events you can listen on:
@@ -188,6 +196,7 @@ model.on('beforeSave', function(obj) {
 ```
 
 <a name="settingfields"/>
+
 ## Setting a properties whitelist
 
 __Fields__ are a way of whitelisting which properties are allowed on an object 
@@ -210,6 +219,7 @@ beer.save({
 ```
 
 <a name="composition"/>
+
 ## Composition of Models.
 
 Composition allows you to relate two models so that you can save nested objects
@@ -295,6 +305,7 @@ beer.save(pliny, function(err, saved) {
 ```
 
 <a name="composition.relations.properties"/>
+
 ### Relations properties
 
 When you save a composed object, you can specify the relationship properties
@@ -388,6 +399,7 @@ beer.readComposition(pliny, 'hops', function(err, hops) {
 });
 ```
 <a name="uniqueness"/>
+
 ## Setting a unique key 
 
 In neo4j, you can enforce uniqueness of nodes by using a uniqueness constraint
@@ -437,6 +449,7 @@ Tag.setUniqueKey('tag', true, function() {
 ```
 
 <a name="computed-fields"/>
+
 ## Computed fields
 
 Computed fields are fields on a model that exist transiently (they aren't stored
@@ -468,6 +481,7 @@ Car.save({ make: 'Citroën', model: 'DS4' }, function(err, car) {
 ```
 
 <a name="schemas"/>
+
 ## Schemas
 
 Schemas are a way of defining some constraints on a model and enforcing them
@@ -506,6 +520,7 @@ Each of the constraints and their behaviour are explained below.
 * [`max`](#schema.max)
 
 <a name="schema.type">
+
 ### `type`
 
 A `type` property on the schema indicates the type that this property should be.
@@ -513,6 +528,7 @@ Upon saving, seraph-model will attempt to coerce properties that have a `type`
 specified into that type.
 
 <a name="schema.type.date"/>
+
 #### `'date'` or `Date`
 
 Expects a date, and coerces it to a number using [`Date.getTime`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getTime).
@@ -527,17 +543,20 @@ new Date("2013-02-08T09:30:26")    ->   1360315826000
 ```
 
 <a name="schema.type.string"/>
+
 #### `'string'` or `String`
 
 Expects a string. Values will be coerced to a string using `.toString()`.
 
 <a name="schema.type.number"/>
+
 #### `'number'` or `Number`
 
 Expects a number. Values will be coerced to a number. If the coercion results
 in `NaN`, validation will fail.
 
 <a name="schema.type.boolean"/>
+
 #### `'boolean'` or `Boolean`
 
 Expects a boolean. Values that are not already a boolean will be coerced based on
@@ -545,6 +564,7 @@ their truthiness (i.e. `!!value`), with the exception of `'0'` which is coerced
 to `false`.
 
 <a name="schema.type.array"/>
+
 #### `'array'` or `Array`
 
 Expects an array. If the value is not an array, it will be coerced to an array
@@ -558,6 +578,7 @@ Examples of coercion:
 ```
 
 <a name="schema.type.others"/>
+
 #### Other types
 
 You can give your own types to check against. If `type` is set to a string value
@@ -566,6 +587,7 @@ that is not one of the above, the value's type is checked with
 `value instanceof type`. 
 
 <a name="schema.default"/>
+
 ### `default`
 
 Supply a default value for this property. If the property is undefined or null
@@ -583,6 +605,7 @@ User.schema = {
 ```
 
 <a name="schema.trim"/>
+
 ### `trim`
 
 Trim leading/trailing whitespace from a string.
@@ -591,6 +614,7 @@ Trim leading/trailing whitespace from a string.
 **Example values:** `true`, `false`. 
 
 <a name="schema.uppercase"/>
+
 ### `uppercase`
 
 Transform a string to uppercase.
@@ -599,6 +623,7 @@ Transform a string to uppercase.
 **Example values:** `true`, `false`. 
 
 <a name="schema.lowercase"/>
+
 ### `lowercase`
 
 Transform a string to lowercase.
@@ -607,6 +632,7 @@ Transform a string to lowercase.
 **Example values:** `true`, `false`. 
 
 <a name="schema.required"/>
+
 ### `required`
 
 Ensure this property exists. Validation will fail if it null or undefined.
@@ -615,6 +641,7 @@ Ensure this property exists. Validation will fail if it null or undefined.
 **Example values:** `true`, `false`. 
 
 <a name="schema.match"/>
+
 ### `match`
 
 Values should match this regular expression. Validation will fail if the value
@@ -624,6 +651,7 @@ does not.
 **Example values:** `/^user/i`, `new RegExp("^user", "i")`. 
 
 <a name="schema.enum"/>
+
 ### `enum`
 
 Values should be one of the values in the enum. Validation will fail if the value
@@ -633,6 +661,7 @@ is not in the enum.
 **Example values:** `['male', 'female']`, `[10, 20, 30]`. 
 
 <a name="schema.min"/>
+
 ### `min`
 
 Values should be greater than or equal to the given number. Validation will fail
@@ -642,6 +671,7 @@ if the value is less.
 **Example values:** `10`, `0.05`. 
 
 <a name="schema.max"/>
+
 ### `max`
 
 Values should be less than or equal to the given number. Validation will fail
@@ -651,6 +681,7 @@ if the value is greater.
 **Example values:** `100`, `0.95`. 
 
 <a name="save"/>
+
 #### `model.save(object, [excludeCompositions,] callback(err, savedObject))`
 
 Saves or updates an object in the database. The steps for doing this are:
@@ -674,6 +705,7 @@ and will be stripped from the object when saving, so it's not recommended using
 this name in your model.
 
 <a name="update"/>
+
 #### `model.update(object, [excludeCompositions,] callback(err, savedObject))`
 
 Additive version of [model.save](#save). Will not rewrite all properties on
@@ -681,12 +713,14 @@ an object, and instead will only update the properties given on `object`. Otherw
 behaves in the same way as [model.save](#save).
 
 <a name="push"/>
+
 #### `model.push(rootId, compName, object(s), callback(err, savedObject(s)))`
 
 Pushes a single object as a composed model on the model represented by `rootId`.
 This does not read the database first so there is no danger of a race condition.
 
 <a name="saveComposition"/>
+
 #### `model.saveComposition(rootId, compName, objects, callback(err, savedObjects))`
 
 Updates a composition set on a model. The models composed under `compName` on the
@@ -694,17 +728,20 @@ model will be replaced with those specified by objects. This can be a partial
 update if you have an already existing array of composited objects.
 
 <a name="read"/>
+
 #### `model.read(idOrObject, callback(err, model))`
 
 Reads a model from the database given an id or an object containing the id. 
 `model` is either the returned object or `false` if it was not found.
 
 <a name="exists"/>
+
 #### `model.exists(idOrObject, callback(err, doesExist))`
 
 Check if a model exists.
 
 <a name="findAll"/>
+
 #### `model.findAll([opts,] callback(err, allOfTheseModels))`
 
 Finds all of the objects that were saved with this type. Returns composited nodes.
@@ -713,6 +750,7 @@ Finds all of the objects that were saved with this type. Returns composited node
 available settings.
 
 <a name="where"/>
+
 #### `model.where(predicate, [opts,] callback(err, matchingModels))`
 
 This is a operationally similar to 
@@ -736,6 +774,7 @@ for `where`:
   specified values, rather than nodes with all of them. 
 
 <a name="query"/>
+
 #### `model.query(query, params, [opts,] callback)`
 
 Takes a partial cypher query and extends it to retrieve seraph-models of this 
@@ -788,12 +827,14 @@ Car.query('MATCH (car:car) WHERE car.age > {x}', { x: 10 }, { varName: 'car' }, 
 ```
 
 <a name="prepare"/>
+
 #### `model.prepare(object, callback(err, preparedObject))`
 
 Prepares an object by using the `model.preparers` array of functions to mutate
 it. For more information, see [Adding preparers](#preparation)
 
 <a name="validate"/>
+
 #### `model.validate(object, callback(err, preparedObject))`
 
 Validates that an object is ready for saving by calling each of the functions in
@@ -801,6 +842,7 @@ the `model.validators` array. For more information, see
 [Adding validators](#validation)
 
 <a name="fields"/>
+
 #### `model.fields`
 
 This is an array of property names which acts as a whitelist for property names
@@ -811,6 +853,7 @@ automatically whitelisted. See
 examples.
 
 <a name="setUniqueKey"/>
+
 #### `model.setUniqueKey(keyName, [returnOldOnConflict = false], [callback])`
 
 Adds a uniqueness constraint to the database that makes sure `keyName` has a
@@ -824,6 +867,7 @@ See the [using a unique key](#unique-key) section for more information and
 examples.
 
 <a name="useTimestamps"/>
+
 #### `model.useTimestamps([createdField = 'created', [updatedField = 'updated'])`
 
 If called, the model will add a `created` and `updated` timestamp field to each
@@ -835,11 +879,13 @@ if you're updating composed models seperately but still want the base model to
 be updated.
 
 <a name="addComputedField"/>
+
 #### `model.addComputedField(fieldName, computer)`
 
 Add a [computed field](#computed-fields) to a model.
 
 <a name="addComputer"/>
+
 #### `model.addComputer(fieldNameArray, computer)`
 
 Add multiple [computed fields](#computed-fields) to a model, that are computed
@@ -849,6 +895,7 @@ fields added. `fieldNameArray` is an array of names of computed properties. Thes
 need to be known so that they will not be persisted back into the database.
 
 <a name='thechangelist'/>
+
 # Changelist
 
 ## 0.6.0
@@ -875,6 +922,7 @@ migrate.
 * Both read and write now use only a single API call.
 
 <a name='migration'/>
+
 # Migration Guide
 
 ## to 0.6.0
