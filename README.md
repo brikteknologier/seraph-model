@@ -767,6 +767,12 @@ Car.where({ make: new RegExp('Aston Martin', 'i') }, { varName: "car" }, functio
 });
 ```
 
+* in(range) statement to specify range of elements to match provide array of elements
+Car.where({ make: ['Aston Martin', 'Toyota', 'BMW'] }, { varName: "car"}, function(err, cars) {
+  // `cars` will match the result as in `IN ['Aston Martin', 'Toyota', 'BMW']` cypher query
+});
+``` 
+
 `opts` is a set of options to pass to the [query](#query) call. Special options
 for `where`:
 
@@ -806,12 +812,16 @@ all Cars with an age greater than `x` years. I might do a query like this:
   own MATCHes when you have non-composed relations. `include` should be an object,
   where each key is the name of the property on the resulting node, and each value
   is an object with the following options:
+  * `where` object that will specify query condition for the relationship ex. `where: { name: 'John' }`
   * `model` the seraph-model that will be read
   * `relName` the name/label of the relationship relating the root node and this model
   * `direction` (optional - default: `out`) the direction of the relationship
     (valid options are: `in`, `out` or `many`).
+  * `strict` (optional - default: 'false') if set to `true` will perform `MATCH`
+    instead of `OPTIONAL MATCH` while quering relations 
   * `many` (optional - default: `false`) if set to true, the result is always
     and array
+  
 * `computeLevels` - compute computed variables on models up to this depth in the
   composition graph. This may be desirable if you are reading many nodes, and
   you have computations that cause a database query to be executed. This can
