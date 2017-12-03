@@ -277,7 +277,7 @@ beer.save(pliny, function(err, saved) {
   });
 
   // Read directly with seraph
-  db.read(saved, function(err, readPlinyFromDb) {
+  db.read(saved, function(err, readPliny) {
     console.log(readPliny)
     /* -> { brewery: 'Russian River',
             name: 'Pliny the Elder',
